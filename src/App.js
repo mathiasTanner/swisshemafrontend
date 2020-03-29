@@ -10,6 +10,7 @@ import PublicationTest from "./components/PublicationTest";
 import Header from "./components/Header";
 
 function App() {
+  //Feeds header and Footer elements to the respective components from the API
   return (
     <MuiThemeProvider theme={Theme}>
       <div className="App">

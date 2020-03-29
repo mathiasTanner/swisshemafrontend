@@ -8,7 +8,8 @@ const middleware = [thunk];
 export default createStore(
   reducers,
   {
-    publications: []
+    publications: [],
+    language: "EN"
   },
 
   composeWithDevTools(
