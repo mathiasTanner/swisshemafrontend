@@ -1,29 +1,33 @@
 import React from "react";
 import Query from "./Query";
+import { connect } from "react-redux";
+import { fetchPublications } from "../actions";
+import PublicationListTest from "./PublicationListTest";
 
 import PUBLICATIONS_QUERY from "../queries/publication/publications";
 
-const PublicationTest = () => {
+const mapStateToProps = (state, ownProps) => {
+  return { publications: state.publbications };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    getPublications: publications => {
+      dispatch(fetchPublications(publications));
+    }
+  };
+};
+
+const PublicationTest = props => {
   return (
     <div>
       <Query query={PUBLICATIONS_QUERY} id={null}>
         {({ data: { publications } }) => {
-          return (
-            <div>
-              {publications.map((publication, i) => {
-                return (
-                  <div key={publication.id}>
-                    <h1>{publication.Title}</h1>
-                    <p>{publication.Content}</p>
-                  </div>
-                );
-              })}
-            </div>
-          );
+          return <PublicationListTest thispublications={publications} />;
         }}
       </Query>
     </div>
   );
 };
 
-export default PublicationTest;
+export default connect(mapStateToProps, mapDispatchToProps)(PublicationTest);
