@@ -8,13 +8,10 @@ import IconButton from "@material-ui/core/IconButton";
 import Grid from "@material-ui/core/Grid";
 import { ChangeLanguage } from "../actions";
 import Select from "@material-ui/core/Select";
-import TextField from "@material-ui/core/TextField";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
-import MenuIcon from "@material-ui/icons/Menu";
-import Container from "@material-ui/core/Container";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -39,21 +36,28 @@ const useStyles = makeStyles(theme => ({
   select: {
     color: "white"
   },
+
   label: {
-    color: "#fff"
+    color: "#fff",
+    "&:hover": {
+      color: "#c6c6c6"
+    }
   },
   icon: {
-    fill: "#fff"
+    fill: "#fff",
+    "&:hover": {
+      color: "#c6c6c6"
+    }
   }
 }));
 
 const useOutlinedInputStyles = makeStyles(theme => ({
   root: {
     "& $notchedOutline": {
-      borderColor: "white"
+      borderColor: "#fff"
     },
     "&:hover $notchedOutline": {
-      borderColor: "#c6c6c6"
+      borderColor: "#b20000"
     },
     "&$focused $notchedOutline": {
       borderColor: "#b20000"
@@ -94,6 +98,7 @@ const Header = props => {
 
   const inputLabel = useRef(null);
   const [labelWidth, setLabelWidth] = useState(0);
+
   useEffect(() => {
     setLabelWidth(inputLabel.current.offsetWidth);
   }, []);
@@ -102,11 +107,7 @@ const Header = props => {
     props.switchLanguage(event.target.value);
   };
 
-  console.log("header log:");
-  console.log(props.header);
-  console.log("language log:");
-  console.log(props.language);
-  //TODO: Nav bar avec bouttons de menus, selecteur de language (prio 1), query pour les bouttons de menus
+  //TODO: Nav bar avec bouttons de menus,  query pour les bouttons de menus
   return (
     <AppBar color="primary" position="static">
       <Toolbar variant="dense">
@@ -118,7 +119,7 @@ const Header = props => {
           ></img>
         </IconButton>
         <Grid container direction="row">
-          <Grid item item xs={3}>
+          <Grid item xs={3}>
             <Grid
               container
               direction="column"
@@ -173,9 +174,13 @@ const Header = props => {
                 <MenuItem value="" disabled>
                   Language
                 </MenuItem>
-                <MenuItem value={"FR"}>Français</MenuItem>
-                <MenuItem value={"DE"}>Deutsch</MenuItem>
-                <MenuItem value={"EN"}>Engish</MenuItem>
+                {props.header.Language.map((language, i) => {
+                  return (
+                    <MenuItem value={language.code} key={i}>
+                      {language.name}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
           </Grid>

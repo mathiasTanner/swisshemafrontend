@@ -3,7 +3,10 @@ import { connect } from "react-redux";
 import { fetchPublications } from "../actions";
 
 const mapStateToProps = (state, ownProps) => {
-  return { publications: state.publbications };
+  return {
+    publications: state.publbications,
+    language: state.language
+  };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -28,12 +31,20 @@ const PublicationListTest = props => {
         return (
           <div key={publication.id}>
             <img src={imgUrl}></img>
-            <h1>{publication.title.FR}</h1>
-            <p>{publication.content.FR}</p>
-            <h1>{publication.title.DE}</h1>
-            <p>{publication.content.DE}</p>
-            <h1>{publication.title.EN}</h1>
-            <p>{publication.content.EN}</p>
+            <h1>
+              {props.language === "FR"
+                ? publication.title.FR
+                : props.language === "EN"
+                ? publication.title.EN
+                : publication.title.DE}
+            </h1>
+            <p>
+              {props.language === "FR"
+                ? publication.content.FR
+                : props.language === "EN"
+                ? publication.content.EN
+                : publication.content.DE}
+            </p>
           </div>
         );
       })}
