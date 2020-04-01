@@ -12,7 +12,22 @@ const HEADER_QUERY = gql`
         FR
         DE
       }
-      Language
+      language {
+        code
+        name
+      }
+      menuitems {
+        id
+        FR
+        EN
+        DE
+        submenu {
+          id
+          FR
+          EN
+          DE
+        }
+      }
     }
   }
 `;

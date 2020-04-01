@@ -12,26 +12,30 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
+import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
+import Hidden from "@material-ui/core/Hidden";
+import withWidth from "@material-ui/core/withWidth";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    height: 100,
-    marginTop: 0,
-    top: 0
-  },
-  menuButton: {
+  logoButton: {
     marginRight: theme.spacing(2)
   },
   logo: {
-    maxHeight: 100,
-    maxWidth: 100
+    maxHeight: 80,
+    maxWidth: 80,
+    [theme.breakpoints.down("sm")]: {
+      maxHeight: 50,
+      maxWidth: 50
+    },
+    [theme.breakpoints.up("lg")]: {
+      maxHeight: 100,
+      maxWidth: 100
+    }
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 100
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2)
+    height: "25%"
   },
   select: {
     color: "white"
@@ -48,6 +52,9 @@ const useStyles = makeStyles(theme => ({
     "&:hover": {
       color: "#c6c6c6"
     }
+  },
+  menu: {
+    margin: theme.spacing(1)
   }
 }));
 
@@ -98,6 +105,8 @@ const Header = props => {
 
   const inputLabel = useRef(null);
   const [labelWidth, setLabelWidth] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuSpacing, setMenuSpacing] = useState(3);
 
   useEffect(() => {
     setLabelWidth(inputLabel.current.offsetWidth);
@@ -107,43 +116,160 @@ const Header = props => {
     props.switchLanguage(event.target.value);
   };
 
-  //TODO: Nav bar avec bouttons de menus,  query pour les bouttons de menus
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuSpacing = () => {
+    switch (props.width) {
+      case "xl":
+        return 3;
+      case "lg":
+        return 3;
+      case "md":
+        return 1;
+      case "sm":
+        return 1;
+      case "xs":
+        return 1;
+      default:
+        return 3;
+    }
+  };
+
+  //TODO: Nav bar avec bouttons de menus
+  //TODO: faire menu pour petits écrans
+  //TODO: adapter la taille du titre selon la taille de l'écran
+  //TODO: Link les menus au router
   return (
     <AppBar color="primary" position="static">
       <Toolbar variant="dense">
-        <IconButton edge="start" className={classes.menuButton} color="inherit">
+        <IconButton edge="start" className={classes.logoButton} color="inherit">
           <img
             src={process.env.REACT_APP_BACKEND_URL + props.header.logo.url}
             alt="logo"
             className={classes.logo}
           ></img>
         </IconButton>
-        <Grid container direction="row">
-          <Grid item xs={3}>
-            <Grid
-              container
-              direction="column"
-              justify="center"
-              alignItems="flex-start"
-            >
-              <Grid item>
-                <Typography variant="h4" color="inherit">
-                  {props.header.Title}
-                </Typography>
-              </Grid>
-              <Grid item>
-                <Typography variant="caption" color="inherit">
-                  {props.language === "FR"
-                    ? props.header.Subtitle.FR
-                    : props.language === "EN"
-                    ? props.header.Subtitle.EN
-                    : props.header.Subtitle.DE}
-                </Typography>
-              </Grid>
+        <Grid
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+        >
+          <Grid item lg={3} md={2}>
+            <Grid container direction="column" justify="center">
+              <Hidden mdDown>
+                <Grid item>
+                  <Typography variant="h5" color="inherit">
+                    {props.header.Title}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="inherit">
+                    {props.language === "FR"
+                      ? props.header.Subtitle.FR
+                      : props.language === "EN"
+                      ? props.header.Subtitle.EN
+                      : props.header.Subtitle.DE}
+                  </Typography>
+                  <Typography variant="body2" color="inherit">
+                    {props.width}
+                  </Typography>
+                </Grid>
+              </Hidden>
+              <Hidden lgUp>
+                <Grid item>
+                  <Typography variant="h6" color="inherit">
+                    {props.header.Title}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="caption" color="inherit">
+                    {props.language === "FR"
+                      ? props.header.Subtitle.FR
+                      : props.language === "EN"
+                      ? props.header.Subtitle.EN
+                      : props.header.Subtitle.DE}
+                  </Typography>
+                  <Typography variant="body2" color="inherit">
+                    {props.width}
+                  </Typography>
+                </Grid>
+              </Hidden>
             </Grid>
           </Grid>
           <Grid item>
-            <FormControl variant="outlined" className={classes.formControl}>
+            <Grid container direction="row" spacing={handleMenuSpacing()}>
+              {props.header.menuitems.map((item, i) => {
+                let hasSubmenu = item.submenu.length < 1 ? false : true;
+                console.log(hasSubmenu);
+
+                return (
+                  <Grid item className={classes.menu}>
+                    <Hidden smDown>
+                      {hasSubmenu ? (
+                        <div>
+                          <Button
+                            aria-controls="submenu"
+                            aria-haspopup="true"
+                            onClick={handleClick}
+                            variant="outlined"
+                          >
+                            {props.language === "FR"
+                              ? item.FR
+                              : props.language === "EN"
+                              ? item.EN
+                              : item.DE}
+                          </Button>
+                          <Menu
+                            id="submenu"
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={handleClose}
+                          >
+                            <MenuItem onClick={handleClose}>Profile</MenuItem>
+                            <MenuItem onClick={handleClose}>
+                              My account
+                            </MenuItem>
+                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                          </Menu>
+                        </div>
+                      ) : (
+                        <div>
+                          <Button
+                            key={i}
+                            onClick={() => console.log("click")}
+                            variant="outlined"
+                          >
+                            {props.language === "FR"
+                              ? item.FR
+                              : props.language === "EN"
+                              ? item.EN
+                              : item.DE}
+                          </Button>
+                        </div>
+                      )}
+                    </Hidden>
+                  </Grid>
+                );
+              })}
+              <Hidden mdUp>
+                <p>{props.width}</p>
+              </Hidden>
+            </Grid>
+          </Grid>
+          <Grid item>
+            <FormControl
+              variant="outlined"
+              className={classes.formControl}
+              margin="dense"
+            >
               <InputLabel
                 ref={inputLabel}
                 htmlFor="outlined-age-simple"
@@ -174,7 +300,7 @@ const Header = props => {
                 <MenuItem value="" disabled>
                   Language
                 </MenuItem>
-                {props.header.Language.map((language, i) => {
+                {props.header.language.map((language, i) => {
                   return (
                     <MenuItem value={language.code} key={i}>
                       {language.name}
@@ -190,4 +316,7 @@ const Header = props => {
   );
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withWidth()(Header));

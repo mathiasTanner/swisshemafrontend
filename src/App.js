@@ -5,6 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import Theme from "./Theme.js";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import HEADER_QUERY from "./queries/header";
+import MENUITEMS_QUERY from "./queries/menuItems";
 import Query from "./components/Query";
 import PublicationTest from "./components/PublicationTest";
 import Header from "./components/Header";

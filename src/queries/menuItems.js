@@ -1,55 +1,21 @@
 import gql from "graphql-tag";
 
 const MENUITEMS_QUERY = gql`
-  query MenuItems {
-    menuItem {
-      AboutUs {
-        EN
+  query MenuItemTests {
+    menuItemTests {
+      id
+      FR
+      EN
+      DE
+      sub_menu_item_tests {
+        id
+        name
         FR
-        DE
-      }
-      Members {
         EN
-        FR
-        DE
-      }
-      International {
-        EN
-        FR
-        DE
-      }
-      Events {
-        EN
-        FR
-        DE
-        SwissGathering {
-          EN
-          FR
-          DE
-        }
-        BearCup {
-          EN
-          FR
-          DE
-        }
-        InstrBootCamp {
-          EN
-          FR
-          DE
-        }
-        Calendar {
-          EN
-          FR
-          DE
-        }
-      }
-      Commissions {
-        EN
-        FR
         DE
       }
     }
   }
 `;
 
-export default HEADER_QUERY;
+export default MENUITEMS_QUERY;
