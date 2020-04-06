@@ -5,7 +5,7 @@ steps:
 
   # BUILD
   - name: "gcr.io/cloud-builders/npm"
-    args: ["run", "test"]
+    args: ["run", "test:unit"]
 
   # BUILD
   - name: "gcr.io/cloud-builders/npm"
