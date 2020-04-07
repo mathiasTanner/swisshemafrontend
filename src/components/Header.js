@@ -61,10 +61,10 @@ const useStyles = makeStyles(theme => ({
 const useOutlinedInputStyles = makeStyles(theme => ({
   root: {
     "& $notchedOutline": {
-      borderColor: "#fff"
+      borderColor: "#c6c6c6"
     },
     "&:hover $notchedOutline": {
-      borderColor: "#b20000"
+      borderColor: "#fff"
     },
     "&$focused $notchedOutline": {
       borderColor: "#b20000"
@@ -129,13 +129,13 @@ const Header = props => {
       case "xl":
         return 3;
       case "lg":
-        return 3;
+        return 2;
       case "md":
-        return 1;
+        return 0;
       case "sm":
-        return 1;
+        return 0;
       case "xs":
-        return 1;
+        return 0;
       default:
         return 3;
     }
@@ -196,9 +196,6 @@ const Header = props => {
                       ? props.header.Subtitle.EN
                       : props.header.Subtitle.DE}
                   </Typography>
-                  <Typography variant="body2" color="inherit">
-                    {props.width}
-                  </Typography>
                 </Grid>
               </Hidden>
             </Grid>
@@ -207,11 +204,10 @@ const Header = props => {
             <Grid container direction="row" spacing={handleMenuSpacing()}>
               {props.header.menuitems.map((item, i) => {
                 let hasSubmenu = item.submenu.length < 1 ? false : true;
-                console.log(hasSubmenu);
 
                 return (
                   <Grid item className={classes.menu}>
-                    <Hidden smDown>
+                    <Hidden mdDown>
                       {hasSubmenu ? (
                         <div>
                           <Button
@@ -219,6 +215,7 @@ const Header = props => {
                             aria-haspopup="true"
                             onClick={handleClick}
                             variant="outlined"
+                            color="secondary"
                           >
                             {props.language === "FR"
                               ? item.FR
@@ -233,11 +230,24 @@ const Header = props => {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                           >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
                             <MenuItem onClick={handleClose}>
-                              My account
+                              {props.language === "FR"
+                                ? item.FR
+                                : props.language === "EN"
+                                ? item.EN
+                                : item.DE}
                             </MenuItem>
-                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                            {item.submenu.map((submenu, i) => {
+                              return (
+                                <MenuItem key={i} onClick={handleClose}>
+                                  {props.language === "FR"
+                                    ? submenu.FR
+                                    : props.language === "EN"
+                                    ? submenu.EN
+                                    : submenu.DE}
+                                </MenuItem>
+                              );
+                            })}
                           </Menu>
                         </div>
                       ) : (
@@ -246,6 +256,7 @@ const Header = props => {
                             key={i}
                             onClick={() => console.log("click")}
                             variant="outlined"
+                            color="secondary"
                           >
                             {props.language === "FR"
                               ? item.FR
@@ -259,7 +270,7 @@ const Header = props => {
                   </Grid>
                 );
               })}
-              <Hidden mdUp>
+              <Hidden lgUp>
                 <p>{props.width}</p>
               </Hidden>
             </Grid>
