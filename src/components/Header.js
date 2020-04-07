@@ -13,9 +13,11 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 import Button from "@material-ui/core/Button";
+import MenuIcon from "@material-ui/icons/Menu";
 import Menu from "@material-ui/core/Menu";
 import Hidden from "@material-ui/core/Hidden";
 import withWidth from "@material-ui/core/withWidth";
+import Drawer from "@material-ui/core/Drawer";
 
 const useStyles = makeStyles(theme => ({
   logoButton: {
@@ -106,11 +108,22 @@ const Header = props => {
   const inputLabel = useRef(null);
   const [labelWidth, setLabelWidth] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [menuSpacing, setMenuSpacing] = useState(3);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   useEffect(() => {
     setLabelWidth(inputLabel.current.offsetWidth);
   }, []);
+
+  const toggleDrawer = open => event => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    setDrawerVisible(open);
+  };
 
   const handleChange = event => {
     props.switchLanguage(event.target.value);
@@ -176,9 +189,6 @@ const Header = props => {
                       : props.language === "EN"
                       ? props.header.Subtitle.EN
                       : props.header.Subtitle.DE}
-                  </Typography>
-                  <Typography variant="body2" color="inherit">
-                    {props.width}
                   </Typography>
                 </Grid>
               </Hidden>
@@ -271,7 +281,35 @@ const Header = props => {
                 );
               })}
               <Hidden lgUp>
-                <p>{props.width}</p>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<MenuIcon />}
+                  onClick={toggleDrawer(true)}
+                >
+                  {props.language === "FR"
+                    ? "Menu"
+                    : props.language === "EN"
+                    ? "Menu"
+                    : "Menü"}
+                </Button>
+                <Drawer
+                  anchor="left"
+                  open={drawerVisible}
+                  onClose={toggleDrawer(false)}
+                >
+                  {props.header.menuitems.map((item, i) => {
+                    return (
+                      <p>
+                        {props.language === "FR"
+                          ? item.FR
+                          : props.language === "EN"
+                          ? item.EN
+                          : item.DE}
+                      </p>
+                    );
+                  })}
+                </Drawer>
               </Hidden>
             </Grid>
           </Grid>
