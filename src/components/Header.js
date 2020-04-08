@@ -138,6 +138,7 @@ const Header = props => {
                     className={classes.logo}
                   ></img>
                 </IconButton>
+                <span>{props.width}</span>
               </Grid>
               <Grid item>
                 <Grid container direction="column" justify="center">

@@ -30,7 +30,7 @@ const PublicationListTest = props => {
           process.env.REACT_APP_BACKEND_URL + publication.image.url;
         return (
           <div key={publication.id}>
-            <img src={imgUrl}></img>
+            <img src={imgUrl} alt=""></img>
             <h1>
               {props.language === "FR"
                 ? publication.title.FR
