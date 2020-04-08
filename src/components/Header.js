@@ -138,7 +138,6 @@ const Header = props => {
                     className={classes.logo}
                   ></img>
                 </IconButton>
-                <span>{props.width}</span>
               </Grid>
               <Grid item>
                 <Grid container direction="column" justify="center">
@@ -159,12 +158,12 @@ const Header = props => {
                     </Grid>
                   </Hidden>
                   <Hidden lgUp>
-                    <Grid item>
-                      <Typography variant="h6" color="inherit">
-                        {props.header.Title}
-                      </Typography>
-                    </Grid>
                     <Hidden smDown>
+                      <Grid item>
+                        <Typography variant="h6" color="inherit">
+                          {props.header.Title}
+                        </Typography>
+                      </Grid>
                       <Grid item>
                         <Typography variant="caption" color="inherit">
                           {props.language === "FR"
