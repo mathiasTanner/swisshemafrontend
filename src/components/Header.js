@@ -13,9 +13,11 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
 import Button from "@material-ui/core/Button";
+import MenuIcon from "@material-ui/icons/Menu";
 import Menu from "@material-ui/core/Menu";
 import Hidden from "@material-ui/core/Hidden";
 import withWidth from "@material-ui/core/withWidth";
+import Drawer from "@material-ui/core/Drawer";
 
 const useStyles = makeStyles(theme => ({
   logoButton: {
@@ -29,8 +31,8 @@ const useStyles = makeStyles(theme => ({
       maxWidth: 50
     },
     [theme.breakpoints.up("lg")]: {
-      maxHeight: 100,
-      maxWidth: 100
+      maxHeight: 85,
+      maxWidth: 85
     }
   },
   formControl: {
@@ -61,13 +63,13 @@ const useStyles = makeStyles(theme => ({
 const useOutlinedInputStyles = makeStyles(theme => ({
   root: {
     "& $notchedOutline": {
-      borderColor: "#fff"
+      borderColor: "#c6c6c6"
     },
     "&:hover $notchedOutline": {
-      borderColor: "#b20000"
+      borderColor: "#fff"
     },
     "&$focused $notchedOutline": {
-      borderColor: "#b20000"
+      borderColor: "#c20000"
     }
   },
   focused: {},
@@ -106,11 +108,22 @@ const Header = props => {
   const inputLabel = useRef(null);
   const [labelWidth, setLabelWidth] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [menuSpacing, setMenuSpacing] = useState(3);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   useEffect(() => {
     setLabelWidth(inputLabel.current.offsetWidth);
   }, []);
+
+  const toggleDrawer = open => event => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    setDrawerVisible(open);
+  };
 
   const handleChange = event => {
     props.switchLanguage(event.target.value);
@@ -129,13 +142,13 @@ const Header = props => {
       case "xl":
         return 3;
       case "lg":
-        return 3;
+        return 2;
       case "md":
-        return 1;
+        return 0;
       case "sm":
-        return 1;
+        return 0;
       case "xs":
-        return 1;
+        return 0;
       default:
         return 3;
     }
@@ -148,7 +161,11 @@ const Header = props => {
   return (
     <AppBar color="primary" position="static">
       <Toolbar variant="dense">
-        <IconButton edge="start" className={classes.logoButton} color="inherit">
+        <IconButton
+          edge="start"
+          className={classes.logoButton}
+          color="secondary"
+        >
           <img
             src={process.env.REACT_APP_BACKEND_URL + props.header.logo.url}
             alt="logo"
@@ -177,9 +194,6 @@ const Header = props => {
                       ? props.header.Subtitle.EN
                       : props.header.Subtitle.DE}
                   </Typography>
-                  <Typography variant="body2" color="inherit">
-                    {props.width}
-                  </Typography>
                 </Grid>
               </Hidden>
               <Hidden lgUp>
@@ -188,18 +202,17 @@ const Header = props => {
                     {props.header.Title}
                   </Typography>
                 </Grid>
-                <Grid item>
-                  <Typography variant="caption" color="inherit">
-                    {props.language === "FR"
-                      ? props.header.Subtitle.FR
-                      : props.language === "EN"
-                      ? props.header.Subtitle.EN
-                      : props.header.Subtitle.DE}
-                  </Typography>
-                  <Typography variant="body2" color="inherit">
-                    {props.width}
-                  </Typography>
-                </Grid>
+                <Hidden smDown>
+                  <Grid item>
+                    <Typography variant="caption" color="inherit">
+                      {props.language === "FR"
+                        ? props.header.Subtitle.FR
+                        : props.language === "EN"
+                        ? props.header.Subtitle.EN
+                        : props.header.Subtitle.DE}
+                    </Typography>
+                  </Grid>
+                </Hidden>
               </Hidden>
             </Grid>
           </Grid>
@@ -207,11 +220,10 @@ const Header = props => {
             <Grid container direction="row" spacing={handleMenuSpacing()}>
               {props.header.menuitems.map((item, i) => {
                 let hasSubmenu = item.submenu.length < 1 ? false : true;
-                console.log(hasSubmenu);
 
                 return (
                   <Grid item className={classes.menu}>
-                    <Hidden smDown>
+                    <Hidden mdDown>
                       {hasSubmenu ? (
                         <div>
                           <Button
@@ -219,6 +231,7 @@ const Header = props => {
                             aria-haspopup="true"
                             onClick={handleClick}
                             variant="outlined"
+                            color="secondary"
                           >
                             {props.language === "FR"
                               ? item.FR
@@ -233,11 +246,24 @@ const Header = props => {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                           >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
                             <MenuItem onClick={handleClose}>
-                              My account
+                              {props.language === "FR"
+                                ? item.FR
+                                : props.language === "EN"
+                                ? item.EN
+                                : item.DE}
                             </MenuItem>
-                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                            {item.submenu.map((submenu, i) => {
+                              return (
+                                <MenuItem key={i} onClick={handleClose}>
+                                  {props.language === "FR"
+                                    ? submenu.FR
+                                    : props.language === "EN"
+                                    ? submenu.EN
+                                    : submenu.DE}
+                                </MenuItem>
+                              );
+                            })}
                           </Menu>
                         </div>
                       ) : (
@@ -246,6 +272,7 @@ const Header = props => {
                             key={i}
                             onClick={() => console.log("click")}
                             variant="outlined"
+                            color="secondary"
                           >
                             {props.language === "FR"
                               ? item.FR
@@ -259,8 +286,36 @@ const Header = props => {
                   </Grid>
                 );
               })}
-              <Hidden mdUp>
-                <p>{props.width}</p>
+              <Hidden lgUp>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<MenuIcon />}
+                  onClick={toggleDrawer(true)}
+                >
+                  {props.language === "FR"
+                    ? "Menu"
+                    : props.language === "EN"
+                    ? "Menu"
+                    : "Menü"}
+                </Button>
+                <Drawer
+                  anchor="left"
+                  open={drawerVisible}
+                  onClose={toggleDrawer(false)}
+                >
+                  {props.header.menuitems.map((item, i) => {
+                    return (
+                      <p>
+                        {props.language === "FR"
+                          ? item.FR
+                          : props.language === "EN"
+                          ? item.EN
+                          : item.DE}
+                      </p>
+                    );
+                  })}
+                </Drawer>
               </Hidden>
             </Grid>
           </Grid>
