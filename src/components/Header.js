@@ -31,8 +31,8 @@ const useStyles = makeStyles(theme => ({
       maxWidth: 50
     },
     [theme.breakpoints.up("lg")]: {
-      maxHeight: 100,
-      maxWidth: 100
+      maxHeight: 85,
+      maxWidth: 85
     }
   },
   formControl: {
@@ -69,7 +69,7 @@ const useOutlinedInputStyles = makeStyles(theme => ({
       borderColor: "#fff"
     },
     "&$focused $notchedOutline": {
-      borderColor: "#b20000"
+      borderColor: "#c20000"
     }
   },
   focused: {},
@@ -161,7 +161,11 @@ const Header = props => {
   return (
     <AppBar color="primary" position="static">
       <Toolbar variant="dense">
-        <IconButton edge="start" className={classes.logoButton} color="inherit">
+        <IconButton
+          edge="start"
+          className={classes.logoButton}
+          color="secondary"
+        >
           <img
             src={process.env.REACT_APP_BACKEND_URL + props.header.logo.url}
             alt="logo"
@@ -198,15 +202,17 @@ const Header = props => {
                     {props.header.Title}
                   </Typography>
                 </Grid>
-                <Grid item>
-                  <Typography variant="caption" color="inherit">
-                    {props.language === "FR"
-                      ? props.header.Subtitle.FR
-                      : props.language === "EN"
-                      ? props.header.Subtitle.EN
-                      : props.header.Subtitle.DE}
-                  </Typography>
-                </Grid>
+                <Hidden smDown>
+                  <Grid item>
+                    <Typography variant="caption" color="inherit">
+                      {props.language === "FR"
+                        ? props.header.Subtitle.FR
+                        : props.language === "EN"
+                        ? props.header.Subtitle.EN
+                        : props.header.Subtitle.DE}
+                    </Typography>
+                  </Grid>
+                </Hidden>
               </Hidden>
             </Grid>
           </Grid>
