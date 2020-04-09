@@ -17,12 +17,12 @@ const HEADER_QUERY = gql`
         name
       }
       menuitems {
-        id
+        name
         FR
         EN
         DE
         submenu {
-          id
+          name
           FR
           EN
           DE
