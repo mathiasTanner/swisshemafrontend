@@ -1,31 +1,34 @@
 import React, { useState } from "react";
+
 import { connect } from "react-redux";
+import { ChangeLanguage } from "../actions";
+import { Link } from "@reach/router";
 import { makeStyles } from "@material-ui/core/styles";
+
+import Grid from "@material-ui/core/Grid";
+import Hidden from "@material-ui/core/Hidden";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import Grid from "@material-ui/core/Grid";
-import { ChangeLanguage } from "../actions";
-import MenuItem from "@material-ui/core/MenuItem";
-import Button from "@material-ui/core/Button";
-import MenuIcon from "@material-ui/icons/Menu";
-import Menu from "@material-ui/core/Menu";
-import Hidden from "@material-ui/core/Hidden";
-import withWidth from "@material-ui/core/withWidth";
 import Drawer from "@material-ui/core/Drawer";
+
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
-import ListSubheader from "@material-ui/core/ListSubheader";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuIcon from "@material-ui/icons/Menu";
+import IconButton from "@material-ui/core/IconButton";
 
+import withWidth from "@material-ui/core/withWidth";
+
+import List from "@material-ui/core/List";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-
-import { Link, Redirect } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   logoButton: {
@@ -43,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
       maxWidth: 85,
     },
   },
+
   select: {
     color: `${theme.palette.secondary.light}`,
   },
@@ -136,8 +140,6 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
-  //TODO: Check router reach pour si c'est mieux
-
   return (
     <AppBar color="primary" position="static">
       <Toolbar variant="dense">
@@ -155,13 +157,16 @@ const Header = (props) => {
                   className={classes.logoButton}
                   color="secondary"
                 >
-                  <img
-                    src={
-                      process.env.REACT_APP_BACKEND_URL + props.header.logo.url
-                    }
-                    alt="logo"
-                    className={classes.logo}
-                  ></img>
+                  <Link to="/">
+                    <img
+                      src={
+                        process.env.REACT_APP_BACKEND_URL +
+                        props.header.logo.url
+                      }
+                      alt="logo"
+                      className={classes.logo}
+                    ></img>
+                  </Link>
                 </IconButton>
               </Grid>
               <Grid item>
