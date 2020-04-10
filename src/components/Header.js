@@ -1,33 +1,34 @@
 import React, { useState } from "react";
+
 import { connect } from "react-redux";
+import { ChangeLanguage } from "../actions";
+import { Link } from "@reach/router";
 import { makeStyles } from "@material-ui/core/styles";
+
+import Grid from "@material-ui/core/Grid";
+import Hidden from "@material-ui/core/Hidden";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import Grid from "@material-ui/core/Grid";
-import { ChangeLanguage } from "../actions";
-import MenuItem from "@material-ui/core/MenuItem";
-import Button from "@material-ui/core/Button";
-import MenuIcon from "@material-ui/icons/Menu";
-import Menu from "@material-ui/core/Menu";
-import Hidden from "@material-ui/core/Hidden";
-import withWidth from "@material-ui/core/withWidth";
 import Drawer from "@material-ui/core/Drawer";
+
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 
-import ListSubheader from "@material-ui/core/ListSubheader";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuIcon from "@material-ui/icons/Menu";
+import IconButton from "@material-ui/core/IconButton";
+
+import withWidth from "@material-ui/core/withWidth";
+
 import List from "@material-ui/core/List";
+import ListSubheader from "@material-ui/core/ListSubheader";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import DraftsIcon from "@material-ui/icons/Drafts";
-import SendIcon from "@material-ui/icons/Send";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import StarBorder from "@material-ui/icons/StarBorder";
 
 const useStyles = makeStyles((theme) => ({
   logoButton: {
@@ -45,17 +46,18 @@ const useStyles = makeStyles((theme) => ({
       maxWidth: 85,
     },
   },
+
   select: {
-    color: "#fff",
+    color: `${theme.palette.secondary.light}`,
   },
   label: {
-    color: "#fff",
+    color: `${theme.palette.secondary.light}`,
   },
   labelFocused: {
-    color: "#fff !important",
+    color: `${theme.palette.secondary.light} !important`,
   },
   icon: {
-    fill: "#fff",
+    fill: `${theme.palette.secondary.light}`,
   },
   menu: {
     [theme.breakpoints.up("md")]: {
@@ -69,17 +71,20 @@ const useStyles = makeStyles((theme) => ({
     "&$cssFocused $notchedOutline": {
       borderColor: `${theme.palette.primary.dark} !important`,
     },
-    "&:hover:not($disabled):not($focused):not($error) $notchedOutline": {
-      borderColor: "#fff !important",
+    "&:hover $notchedOutline": {
+      borderColor: `${theme.palette.secondary.light} !important`,
     },
   },
   cssFocused: {},
   cssHover: {},
   notchedOutline: {
-    borderColor: "#c6c6c6 !important",
+    borderColor: `${theme.palette.secondary.dark} !important`,
   },
-
   drawer: {
+    backgroundColor: `${theme.palette.secondary.main} `,
+    color: `${theme.palette.secondary.contrastText} `,
+  },
+  drawerList: {
     width: "100%",
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
@@ -106,7 +111,7 @@ const Header = (props) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [nestedOpen, setNestedOpen] = useState(true);
+  const [nestedOpen, setNestedOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
     if (
@@ -127,16 +132,13 @@ const Header = (props) => {
     props.switchLanguage(event.target.value);
   };
 
-  const handleClick = (event) => {
+  const openSubmenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const closeSubmenu = () => {
     setAnchorEl(null);
   };
-
-  //TODO: Drawer avec bouttons de menus
-  //TODO: Link les menus au router
 
   return (
     <AppBar color="primary" position="static">
@@ -155,13 +157,16 @@ const Header = (props) => {
                   className={classes.logoButton}
                   color="secondary"
                 >
-                  <img
-                    src={
-                      process.env.REACT_APP_BACKEND_URL + props.header.logo.url
-                    }
-                    alt="logo"
-                    className={classes.logo}
-                  ></img>
+                  <Link to="/">
+                    <img
+                      src={
+                        process.env.REACT_APP_BACKEND_URL +
+                        props.header.logo.url
+                      }
+                      alt="logo"
+                      className={classes.logo}
+                    ></img>
+                  </Link>
                 </IconButton>
               </Grid>
               <Grid item>
@@ -183,11 +188,13 @@ const Header = (props) => {
                     </Grid>
                   </Hidden>
                   <Hidden lgUp>
-                    <Grid item>
-                      <Typography variant="h6" color="inherit">
-                        {props.header.Title}
-                      </Typography>
-                    </Grid>
+                    <Hidden xsDown>
+                      <Grid item>
+                        <Typography variant="h6" color="inherit">
+                          {props.header.Title}
+                        </Typography>
+                      </Grid>
+                    </Hidden>
                     <Hidden smDown>
                       <Grid item>
                         <Typography variant="caption" color="inherit">
@@ -209,7 +216,7 @@ const Header = (props) => {
               container
               direction="row"
               justify="flex-end"
-              spacing="3"
+              spacing={3}
               alignItems="center"
             >
               <Grid item>
@@ -218,14 +225,14 @@ const Header = (props) => {
                     let hasSubmenu = item.submenu.length < 1 ? false : true;
 
                     return (
-                      <Grid item className={classes.menu}>
+                      <Grid item className={classes.menu} key={i}>
                         <Hidden mdDown>
                           {hasSubmenu ? (
                             <div>
                               <Button
                                 aria-controls="submenu"
                                 aria-haspopup="true"
-                                onClick={handleClick}
+                                onClick={openSubmenu}
                                 variant="outlined"
                                 color="secondary"
                               >
@@ -240,9 +247,13 @@ const Header = (props) => {
                                 anchorEl={anchorEl}
                                 keepMounted
                                 open={Boolean(anchorEl)}
-                                onClose={handleClose}
+                                onClose={closeSubmenu}
                               >
-                                <MenuItem onClick={handleClose}>
+                                <MenuItem
+                                  onClick={closeSubmenu}
+                                  component={Link}
+                                  to={"/" + item.name}
+                                >
                                   {props.language === "FR"
                                     ? item.FR
                                     : props.language === "EN"
@@ -251,7 +262,12 @@ const Header = (props) => {
                                 </MenuItem>
                                 {item.submenu.map((submenu, i) => {
                                   return (
-                                    <MenuItem key={i} onClick={handleClose}>
+                                    <MenuItem
+                                      key={i}
+                                      onClick={closeSubmenu}
+                                      component={Link}
+                                      to={"/" + submenu.name}
+                                    >
                                       {props.language === "FR"
                                         ? submenu.FR
                                         : props.language === "EN"
@@ -266,7 +282,8 @@ const Header = (props) => {
                             <div>
                               <Button
                                 key={i}
-                                onClick={() => console.log("click")}
+                                component={Link}
+                                to={"/" + item.name}
                                 variant="outlined"
                                 color="secondary"
                               >
@@ -298,17 +315,20 @@ const Header = (props) => {
                       </Button>
                     </Hidden>
                     <Hidden mdUp>
-                      <Button
-                        variant="outlined"
+                      <IconButton
                         color="secondary"
-                        startIcon={<MenuIcon />}
                         onClick={toggleDrawer(true)}
-                      />
+                      >
+                        <MenuIcon />
+                      </IconButton>
                     </Hidden>
                     <Drawer
                       anchor="left"
                       open={drawerVisible}
                       onClose={toggleDrawer(false)}
+                      classes={{
+                        paper: classes.drawer,
+                      }}
                     >
                       <List
                         component="nav"
@@ -330,8 +350,8 @@ const Header = (props) => {
                           let hasSubmenu =
                             item.submenu.length < 1 ? false : true;
                           return hasSubmenu ? (
-                            <span>
-                              <ListItem button onClick={openNested}>
+                            <span key={i}>
+                              <ListItem button onClick={openNested} key={i}>
                                 <ListItemText
                                   primary={
                                     props.language === "FR"
@@ -340,7 +360,6 @@ const Header = (props) => {
                                       ? item.EN
                                       : item.DE
                                   }
-                                  className={classes.drawer}
                                 />
                                 {nestedOpen ? <ExpandLess /> : <ExpandMore />}
                               </ListItem>
@@ -350,7 +369,12 @@ const Header = (props) => {
                                 unmountOnExit
                               >
                                 <List component="div" disablePadding>
-                                  <ListItem button className={classes.nested}>
+                                  <ListItem
+                                    button
+                                    className={classes.nested}
+                                    component={Link}
+                                    to={"/" + item.name}
+                                  >
                                     <ListItemText
                                       primary={
                                         props.language === "FR"
@@ -364,8 +388,11 @@ const Header = (props) => {
                                   {item.submenu.map((submenu, i) => {
                                     return (
                                       <ListItem
+                                        key={i}
                                         button
                                         className={classes.nested}
+                                        component={Link}
+                                        to={"/" + submenu.name}
                                       >
                                         <ListItemText
                                           primary={
@@ -383,7 +410,12 @@ const Header = (props) => {
                               </Collapse>
                             </span>
                           ) : (
-                            <ListItem button>
+                            <ListItem
+                              button
+                              key={i}
+                              component={Link}
+                              to={"/" + item.name}
+                            >
                               <ListItemText
                                 primary={
                                   props.language === "FR"
