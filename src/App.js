@@ -1,12 +1,13 @@
 import React from "react";
-//import { BrowserRouter as Router } from "react-router-dom";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Theme from "./Theme.js";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import HEADER_QUERY from "./queries/header";
+import FOOTER_QUERY from "./queries/footer";
 import Query from "./components/Query";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import { ApolloProvider } from "react-apollo";
 import client from "./utils/apolloClient";
 import { Provider } from "react-redux";
@@ -47,7 +48,13 @@ function App() {
                   <AboutUs path="/" />
                 </Router>
               </Grid>
-              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <Query query={FOOTER_QUERY} id={null}>
+                  {({ data: { footer } }) => {
+                    return <Footer footer={footer} />;
+                  }}
+                </Query>
+              </Grid>
             </Grid>
           </div>
         </MuiThemeProvider>
