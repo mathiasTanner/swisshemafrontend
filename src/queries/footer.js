@@ -3,9 +3,19 @@ import gql from "graphql-tag";
 const FOOTER_QUERY = gql`
   query Footer {
     footer {
-      mailing_list
+      id
+      newsletterMessage {
+        EN
+        FR
+        DE
+      }
+      newsletterDisclaimer {
+        EN
+        FR
+        DE
+      }
       facebook
-      label {
+      contactLabel {
         EN
         FR
         DE
