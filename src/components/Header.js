@@ -30,6 +30,8 @@ import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
+import languageDisplay from "../functions/languageDisplay";
+
 const useStyles = makeStyles((theme) => ({
   logoButton: {
     marginRight: theme.spacing(2),
@@ -106,6 +108,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   };
 };
 
+//TODO:in the entire website, change the language selection in an external function taking the element and the selected language so have smoothly available language update from only the back-end
+//TODO: refactor code with menu text to be able to add italian and romanch just in case
+
 const Header = (props) => {
   const classes = useStyles();
 
@@ -179,11 +184,7 @@ const Header = (props) => {
                     </Grid>
                     <Grid item>
                       <Typography variant="caption" color="inherit">
-                        {props.language === "FR"
-                          ? props.header.Subtitle.FR
-                          : props.language === "EN"
-                          ? props.header.Subtitle.EN
-                          : props.header.Subtitle.DE}
+                        {languageDisplay(props.header.Subtitle, props.language)}
                       </Typography>
                     </Grid>
                   </Hidden>
@@ -198,11 +199,10 @@ const Header = (props) => {
                     <Hidden smDown>
                       <Grid item>
                         <Typography variant="caption" color="inherit">
-                          {props.language === "FR"
-                            ? props.header.Subtitle.FR
-                            : props.language === "EN"
-                            ? props.header.Subtitle.EN
-                            : props.header.Subtitle.DE}
+                          {languageDisplay(
+                            props.header.Subtitle,
+                            props.language
+                          )}
                         </Typography>
                       </Grid>
                     </Hidden>
@@ -236,11 +236,7 @@ const Header = (props) => {
                                 variant="outlined"
                                 color="secondary"
                               >
-                                {props.language === "FR"
-                                  ? item.FR
-                                  : props.language === "EN"
-                                  ? item.EN
-                                  : item.DE}
+                                {languageDisplay(item, props.language)}
                               </Button>
                               <Menu
                                 id="submenu"
@@ -254,11 +250,7 @@ const Header = (props) => {
                                   component={Link}
                                   to={"/" + item.name}
                                 >
-                                  {props.language === "FR"
-                                    ? item.FR
-                                    : props.language === "EN"
-                                    ? item.EN
-                                    : item.DE}
+                                  {languageDisplay(item, props.language)}
                                 </MenuItem>
                                 {item.submenu.map((submenu, i) => {
                                   return (
@@ -268,11 +260,7 @@ const Header = (props) => {
                                       component={Link}
                                       to={"/" + submenu.name}
                                     >
-                                      {props.language === "FR"
-                                        ? submenu.FR
-                                        : props.language === "EN"
-                                        ? submenu.EN
-                                        : submenu.DE}
+                                      {languageDisplay(submenu, props.language)}
                                     </MenuItem>
                                   );
                                 })}
@@ -287,11 +275,7 @@ const Header = (props) => {
                                 variant="outlined"
                                 color="secondary"
                               >
-                                {props.language === "FR"
-                                  ? item.FR
-                                  : props.language === "EN"
-                                  ? item.EN
-                                  : item.DE}
+                                {languageDisplay(item, props.language)}
                               </Button>
                             </div>
                           )}
@@ -307,11 +291,16 @@ const Header = (props) => {
                         startIcon={<MenuIcon />}
                         onClick={toggleDrawer(true)}
                       >
-                        {props.language === "FR"
-                          ? "Menu"
-                          : props.language === "EN"
-                          ? "Menu"
-                          : "Menü"}
+                        {languageDisplay(
+                          {
+                            FR: "Menu",
+                            EN: "Menu",
+                            DE: "Menü",
+                            IT: "Menu",
+                            RO: "Menu",
+                          },
+                          props.language
+                        )}
                       </Button>
                     </Hidden>
                     <Hidden mdUp>
@@ -338,11 +327,16 @@ const Header = (props) => {
                             component="div"
                             id="nested-list-subheader"
                           >
-                            {props.language === "FR"
-                              ? "Menu"
-                              : props.language === "EN"
-                              ? "Menu"
-                              : "Menü"}
+                            {languageDisplay(
+                              {
+                                FR: "Menu",
+                                EN: "Menu",
+                                DE: "Menü",
+                                IT: "Menu",
+                                RO: "Menu",
+                              },
+                              props.language
+                            )}
                           </ListSubheader>
                         }
                       >
@@ -353,13 +347,10 @@ const Header = (props) => {
                             <span key={i}>
                               <ListItem button onClick={openNested} key={i}>
                                 <ListItemText
-                                  primary={
-                                    props.language === "FR"
-                                      ? item.FR
-                                      : props.language === "EN"
-                                      ? item.EN
-                                      : item.DE
-                                  }
+                                  primary={languageDisplay(
+                                    item,
+                                    props.language
+                                  )}
                                 />
                                 {nestedOpen ? <ExpandLess /> : <ExpandMore />}
                               </ListItem>
@@ -376,13 +367,10 @@ const Header = (props) => {
                                     to={"/" + item.name}
                                   >
                                     <ListItemText
-                                      primary={
-                                        props.language === "FR"
-                                          ? item.FR
-                                          : props.language === "EN"
-                                          ? item.EN
-                                          : item.DE
-                                      }
+                                      primary={languageDisplay(
+                                        item,
+                                        props.language
+                                      )}
                                     />
                                   </ListItem>
                                   {item.submenu.map((submenu, i) => {
@@ -395,13 +383,10 @@ const Header = (props) => {
                                         to={"/" + submenu.name}
                                       >
                                         <ListItemText
-                                          primary={
-                                            props.language === "FR"
-                                              ? submenu.FR
-                                              : props.language === "EN"
-                                              ? submenu.EN
-                                              : submenu.DE
-                                          }
+                                          primary={languageDisplay(
+                                            submenu,
+                                            props.language
+                                          )}
                                         />
                                       </ListItem>
                                     );
@@ -417,13 +402,7 @@ const Header = (props) => {
                               to={"/" + item.name}
                             >
                               <ListItemText
-                                primary={
-                                  props.language === "FR"
-                                    ? item.FR
-                                    : props.language === "EN"
-                                    ? item.EN
-                                    : item.DE
-                                }
+                                primary={languageDisplay(item, props.language)}
                               />
                             </ListItem>
                           );

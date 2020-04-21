@@ -25,6 +25,8 @@ import Query from "./Query";
 import FORM_QUERY from "../queries/forms/form";
 import ContactForm from "./ContactForm";
 
+import languageDisplay from "../functions/languageDisplay";
+
 const useStyles = makeStyles((theme) => ({
   appBar: {
     top: "auto",
@@ -76,13 +78,7 @@ const Footer = (props) => {
     <AppBar position="fixed" color="primary" className={classes.appBar}>
       <BottomNavigation showLabels className={classes.bottomNavigation}>
         <BottomNavigationAction
-          label={
-            props.language === "EN"
-              ? props.footer.contactLabel.EN
-              : props.language === "FR"
-              ? props.footer.contactLabel.FR
-              : props.footer.contactLabel.DE
-          }
+          label={languageDisplay(props.footer.contactLabel, props.language)}
           icon={<ContactSupportIcon />}
           className={classes.bottomLabel}
           onClick={handleContactOpen}
@@ -127,11 +123,10 @@ const Footer = (props) => {
             <input type="hidden" name="webform_id" value="7359" />
             <div>
               <DialogContentText>
-                {props.language === "EN"
-                  ? props.footer.newsletterMessage.EN
-                  : props.language === "FR"
-                  ? props.footer.newsletterMessage.FR
-                  : props.footer.newsletterMessage.DE}
+                {languageDisplay(
+                  props.footer.newsletterMessage,
+                  props.language
+                )}
               </DialogContentText>
 
               <div>
@@ -147,18 +142,26 @@ const Footer = (props) => {
                   />
                 </div>
                 <DialogContentText className={classes.newsbody}>
-                  {props.language === "EN"
-                    ? props.footer.newsletterDisclaimer.EN
-                    : props.language === "FR"
-                    ? props.footer.newsletterDisclaimer.FR
-                    : props.footer.newsletterDisclaimer.DE}
+                  {languageDisplay(
+                    props.footer.newsletterDisclaimer,
+                    props.language
+                  )}
                 </DialogContentText>
               </div>
             </div>
           </DialogContent>
           <DialogActions>
             <Button autoFocus onClick={handleNewsClose} color="primary">
-              close
+              {languageDisplay(
+                {
+                  EN: "Close",
+                  FR: "Fermer",
+                  DE: "Schliessen",
+                  IT: "Chiudere",
+                  RO: "Finir",
+                },
+                props.language
+              )}
             </Button>
             <Button
               color="primary"
@@ -166,43 +169,21 @@ const Footer = (props) => {
               type="submit"
               onClick={handleNewsClose}
             >
-              {props.language === "EN"
-                ? "Submit"
-                : props.language === "FR"
-                ? "Envoyer"
-                : "Senden"}
+              {languageDisplay(
+                {
+                  EN: "Submit",
+                  FR: "Envoyer",
+                  DE: "Senden",
+                  IT: "Spedire",
+                  RO: "Spedir",
+                },
+                props.language
+              )}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
-      {/* <Dialog
-        fullScreen={isMobile}
-        open={openContact}
-        onClose={handleContactClose}
-        aria-labelledby="responsive-contact-title"
-        classes={{
-          paper: classes.contactDialog,
-        }}
-      >
-        <DialogTitle id="responsive-contact-title">
-          {props.language === "EN"
-            ? props.footer.contactLabel.EN
-            : props.language === "FR"
-            ? props.footer.contactLabel.FR
-            : props.footer.contactLabel.DE}
-        </DialogTitle>
-        <DialogContent>
-          {props.footer.forms.map((form, i) => {
-            return (
-              <Query query={FORM_QUERY} id={form.id} key={i}>
-                {({ data: { form } }) => {
-                  return <ContactForm form={form} close={handleContactClose} />;
-                }}
-              </Query>
-            );
-          })}
-        </DialogContent>
-      </Dialog> */}
+
       {props.footer.forms.map((form, i) => {
         return (
           <Query query={FORM_QUERY} id={form.id} key={i}>
