@@ -15,6 +15,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
+import languageDisplay from "../functions/languageDisplay";
+
 const useStyles = makeStyles((theme) => ({
   question: {
     margin: "15px",
@@ -33,6 +35,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {};
 };
+
+//TODO: make sure state is flushed on close without having flash of undone form
 
 const Form = (props) => {
   const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
@@ -57,6 +61,13 @@ const Form = (props) => {
     FR: "Votre mail a été envoyé avec succès",
     EN: "Your mail was sent successfully",
     DE: "Ihre Mail wurde erfolgreich gesendet",
+    IT: "La tua posta è stata inviata con successo",
+    RO: "Your mail was sent successfully",
+  };
+
+  const handleClose = () => {
+    props.close();
+    setCOnfirmationVisible(false);
   };
 
   useEffect(() => {
@@ -89,11 +100,12 @@ const Form = (props) => {
           to: "swiss.federation.hema@gmail.com",
           from: email,
           replyTo: email,
-          cc: "mathias.tanner.ge@gmail.com",
+          cc: "mathias.tanner.ge@gmail.com, ",
           subject: subject,
           text: text,
         }),
       };
+
       fetch("https://admin.tannerdev.tech/email", requestOptions)
         .then((response) => response.json())
         .then((data) => setCOnfirmationVisible(true));
@@ -192,13 +204,7 @@ const Form = (props) => {
             <TextField
               id="text"
               defaultValue=""
-              label={
-                props.language === "FR"
-                  ? question.FR
-                  : props.language === "EN"
-                  ? question.EN
-                  : question.DE
-              }
+              label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
                 question.answer = event.target.value;
@@ -219,13 +225,7 @@ const Form = (props) => {
             <TextField
               id="long_text"
               defaultValue=""
-              label={
-                props.language === "FR"
-                  ? question.FR
-                  : props.language === "EN"
-                  ? question.EN
-                  : question.DE
-              }
+              label={languageDisplay(question, props.language)}
               required={question.mandatory}
               multiline
               rows="6"
@@ -249,13 +249,7 @@ const Form = (props) => {
               id="email"
               error={validator.mail.wrongInput}
               defaultValue=""
-              label={
-                props.language === "FR"
-                  ? question.FR
-                  : props.language === "EN"
-                  ? question.EN
-                  : question.DE
-              }
+              label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
                 question.answer = event.target.value;
@@ -287,27 +281,19 @@ const Form = (props) => {
     <Dialog
       fullScreen={isMobile}
       open={props.open}
-      onClose={props.close}
+      onClose={handleClose}
       aria-labelledby="responsive-contact-title"
       classes={{
         paper: classes.contactDialog,
       }}
     >
       <DialogTitle id="responsive-contact-title">
-        {props.language === "EN"
-          ? props.contactLabel.EN
-          : props.language === "FR"
-          ? props.contactLabel.FR
-          : props.contactLabel.DE}
+        {languageDisplay(props.contactLabel, props.language)}
       </DialogTitle>
       <DialogContent>
         {!confirmationVisible ? (
           <Typography variant="h6" className={classes.description}>
-            {props.language === "FR"
-              ? props.form.Description.FR
-              : props.language === "EN"
-              ? props.form.Description.EN
-              : props.form.Description.DE}
+            {languageDisplay(props.form.Description, props.language)}
           </Typography>
         ) : null}
         {!confirmationVisible ? (
@@ -320,48 +306,59 @@ const Form = (props) => {
           })
         ) : (
           <DialogContentText>
-            {props.language === "FR"
-              ? finalMsg.FR
-              : props.language === "EN"
-              ? finalMsg.EN
-              : finalMsg.DE}
+            {languageDisplay(finalMsg, props.language)}
           </DialogContentText>
         )}
       </DialogContent>
       <DialogActions>
+        {disabled ? (
+          <FormHelperText>
+            *{" "}
+            {languageDisplay(
+              {
+                FR: "Obligatoire",
+                EN: "Mandatory",
+                DE: "Obligatorisch",
+                IT: "Obbligatorio",
+                RO: "Stuair",
+              },
+              props.language
+            )}
+          </FormHelperText>
+        ) : null}
         {!confirmationVisible ? (
           <div>
-            {disabled ? (
-              <FormHelperText>
-                *{" "}
-                {props.language === "FR"
-                  ? "Obligatoire"
-                  : props.language === "EN"
-                  ? "Mandatory"
-                  : "Obligatorisch"}
-              </FormHelperText>
-            ) : null}
             <Button
               color="primary"
               variant="contained"
               disabled={disabled}
               onClick={submitForm}
             >
-              {props.language === "FR"
-                ? "Envoyer"
-                : props.language === "EN"
-                ? "Send"
-                : "Senden"}
+              {languageDisplay(
+                {
+                  EN: "Submit",
+                  FR: "Envoyer",
+                  DE: "Senden",
+                  IT: "Spedire",
+                  RO: "Spedir",
+                },
+                props.language
+              )}
             </Button>
           </div>
         ) : null}
 
-        <Button color="primary" onClick={props.close}>
-          {props.language === "FR"
-            ? "Fermer"
-            : props.language === "EN"
-            ? "Close"
-            : "Schliessen"}
+        <Button color="primary" onClick={handleClose}>
+          {languageDisplay(
+            {
+              EN: "Close",
+              FR: "Fermer",
+              DE: "Schliessen",
+              IT: "Chiudere",
+              RO: "Finir",
+            },
+            props.language
+          )}
         </Button>
       </DialogActions>
     </Dialog>
