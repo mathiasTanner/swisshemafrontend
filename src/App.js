@@ -1,11 +1,14 @@
 import React from "react";
 import { MuiThemeProvider } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Theme from "./Theme.js";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import HEADER_QUERY from "./queries/header";
 import FOOTER_QUERY from "./queries/footer";
+import ABOUTUS_QUERY from "./queries/aboutUs";
 import Query from "./components/Query";
+import PageQuery from "./components/PageQuery";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ApolloProvider } from "react-apollo";
@@ -19,7 +22,25 @@ import Events from "./components/pages/events/Events.js";
 import Evenment from "./components/pages/events/Evenment.js";
 import Calendar from "./components/pages/events/Calendar.js";
 
+const useStyles = makeStyles((theme) => ({
+  App: {
+    display: "inline-block",
+  },
+  header: {},
+  content: {
+    marginBottom: "6vh",
+    [theme.breakpoints.up("xs")]: {
+      marginTop: "9vh",
+    },
+    [theme.breakpoints.up("md")]: {
+      marginTop: "13vh",
+    },
+  },
+  footer: {},
+}));
+
 function App() {
+  const classes = useStyles();
   //Feeds header and Footer elements to the respective components from the API
   return (
     <ApolloProvider client={client}>
@@ -29,14 +50,14 @@ function App() {
             <CssBaseline />
 
             <Grid container spacing={0}>
-              <Grid item xs={12}>
+              <Grid item xs={12} id="header" className={classes.header}>
                 <Query query={HEADER_QUERY} id={null}>
                   {({ data: { header } }) => {
                     return <Header header={header} />;
                   }}
                 </Query>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} id="content" className={classes.content}>
                 <Router>
                   <AboutUs path="/aboutus" />
                   <Members path="/members" />
@@ -48,7 +69,8 @@ function App() {
                   <AboutUs path="/" />
                 </Router>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item>{/* TODO: faire marcher la requête */}</Grid>
+              <Grid item xs={12} id="footer" className={classes.footer}>
                 <Query query={FOOTER_QUERY} id={null}>
                   {({ data: { footer } }) => {
                     return <Footer footer={footer} />;

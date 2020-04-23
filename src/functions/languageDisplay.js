@@ -7,6 +7,10 @@ const languageDisplay = (element, language) => {
         ? element.FR
         : language === "EN"
         ? element.EN
+        : language === "IT"
+        ? element.IT
+        : language === "RO"
+        ? element.RO
         : element.DE}
     </span>
   );
