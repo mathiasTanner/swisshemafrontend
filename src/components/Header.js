@@ -108,9 +108,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   };
 };
 
-//TODO:in the entire website, change the language selection in an external function taking the element and the selected language so have smoothly available language update from only the back-end
-//TODO: refactor code with menu text to be able to add italian and romanch just in case
-
 const Header = (props) => {
   const classes = useStyles();
 
@@ -146,7 +143,7 @@ const Header = (props) => {
   };
 
   return (
-    <AppBar color="primary" position="static">
+    <AppBar color="primary" position="fixed">
       <Toolbar variant="dense">
         <Grid
           container
