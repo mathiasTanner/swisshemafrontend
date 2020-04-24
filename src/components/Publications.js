@@ -22,6 +22,7 @@ import languageDisplay from "../functions/languageDisplay";
 const useStyles = makeStyles((theme) => ({
   subheader: {
     color: `${theme.palette.primary.dark} `,
+    margin: "20px",
   },
   expansion: {
     width: "60vw",
@@ -63,12 +64,10 @@ const Publications = (props) => {
 
   return (
     <div>
-      <Typography variant="button" className={classes.subheader}>
+      <Typography variant="h5" className={classes.subheader}>
         News
       </Typography>
       {props.publications.map((publication, i) => {
-        console.log(publication);
-
         return (
           <ExpansionPanel
             classes={{ root: classes.expansion }}

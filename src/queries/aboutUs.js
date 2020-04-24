@@ -48,6 +48,21 @@ const ABOUTUS_QUERY = gql`
           url
         }
       }
+      partnerlabel {
+        FR
+        DE
+        EN
+        IT
+        RO
+      }
+      partners {
+        name
+        logo {
+          url
+          name
+        }
+        link
+      }
     }
   }
 `;
