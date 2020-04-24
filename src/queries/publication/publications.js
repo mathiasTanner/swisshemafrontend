@@ -3,23 +3,30 @@ import gql from "graphql-tag";
 const PUBLICATIONS_QUERY = gql`
   query Publications {
     publications {
-      id
+      category
       title {
         FR
         DE
         EN
+        IT
+        RO
       }
       content {
         FR
         DE
         EN
+        IT
+        RO
       }
       image {
         url
-        hash
-        sha256
+        name
       }
       published_at
+      event {
+        name
+        pagename
+      }
     }
   }
 `;

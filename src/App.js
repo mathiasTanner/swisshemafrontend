@@ -6,9 +6,7 @@ import Theme from "./Theme.js";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import HEADER_QUERY from "./queries/header";
 import FOOTER_QUERY from "./queries/footer";
-import ABOUTUS_QUERY from "./queries/aboutUs";
 import Query from "./components/Query";
-import PageQuery from "./components/PageQuery";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ApolloProvider } from "react-apollo";
@@ -69,7 +67,6 @@ function App() {
                   <AboutUs path="/" />
                 </Router>
               </Grid>
-              <Grid item>{/* TODO: faire marcher la requête */}</Grid>
               <Grid item xs={12} id="footer" className={classes.footer}>
                 <Query query={FOOTER_QUERY} id={null}>
                   {({ data: { footer } }) => {
