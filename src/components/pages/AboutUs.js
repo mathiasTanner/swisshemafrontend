@@ -21,6 +21,7 @@ import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import Typography from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Link from "@material-ui/core/Link";
 
 import languageDisplay from "../../functions/languageDisplay";
 
@@ -85,8 +86,26 @@ const useStyles = makeStyles((theme) => ({
   publications: {
     textAlign: "center",
   },
+  partners: {
+    margin: "10px",
+    textAlign: "center",
+  },
   subheader: {
     color: `${theme.palette.primary.dark} `,
+    margin: "20px",
+  },
+  imgpartner: {
+    maxHeight: "10vh",
+  },
+  partnercaption: {
+    textAlign: "center",
+  },
+  status: {
+    margin: "15px",
+  },
+  statusbutton: {
+    color: `${theme.palette.secondary.light} `,
+    backgroundColor: `${theme.palette.primary.dark} `,
   },
 }));
 
@@ -117,6 +136,8 @@ const AboutUs = (props) => {
   return (
     <PageQuery query={ABOUTUS_QUERY}>
       {({ data: { aboutUs } }) => {
+        console.log(aboutUs);
+
         return (
           <Paper className={classes.root}>
             <Grid
@@ -168,13 +189,14 @@ const AboutUs = (props) => {
                     })}
                   </Grid>
                 </Grid>
-
                 <Grid item id="title" className={classes.title}>
-                  <Typography variant={isMobile ? "h6" : "h4"}>
+                  <Typography
+                    variant={isMobile ? "h6" : "h4"}
+                    className={classes.subheader}
+                  >
                     {languageDisplay(aboutUs.Title, lang)}
                   </Typography>
                 </Grid>
-
                 <Grid item id="hemaDef" className={classes.hemaDef}>
                   <ExpansionPanel classes={{ root: classes.expansion }}>
                     <ExpansionPanelSummary
@@ -210,6 +232,36 @@ const AboutUs = (props) => {
                     }
                   />
                 </Grid>
+                <Grid item id="status" className={classes.status}>
+                  <Grid
+                    container
+                    direction="row"
+                    justify="center"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    {aboutUs.status.map((statut, i) => {
+                      return (
+                        <Grid item key={i}>
+                          <Button
+                            variant="contained"
+                            component={Link}
+                            className={classes.statusbutton}
+                            href={
+                              process.env.REACT_APP_BACKEND_URL +
+                              statut.document.url
+                            }
+                            target="_blank"
+                          >
+                            {statut.language === "FR"
+                              ? "Status en Français"
+                              : "Deutsche Statuten"}
+                          </Button>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Grid>
                 <Grid item id="publications" className={classes.publications}>
                   <Grid container justify="center">
                     <Query query={PUBLICATIONS_QUERY}>
@@ -217,6 +269,47 @@ const AboutUs = (props) => {
                         return <Publications publications={publications} />;
                       }}
                     </Query>
+                  </Grid>
+                </Grid>
+                <Grid item id="partners" className={classes.partners}>
+                  <Typography variant="h5" className={classes.subheader}>
+                    {languageDisplay(aboutUs.partnerlabel, lang)}
+                  </Typography>
+                  <Grid
+                    container
+                    direction="row"
+                    justify="space-evenly"
+                    alignItems="center"
+                  >
+                    {aboutUs.partners.map((item, i) => {
+                      return (
+                        <Grid item key={i}>
+                          <Grid container direction="column">
+                            <Link
+                              href={item.link}
+                              terger="_blank"
+                              rel="noopener"
+                            >
+                              <img
+                                src={
+                                  process.env.REACT_APP_BACKEND_URL +
+                                  item.logo.url
+                                }
+                                alt={item.logo.name}
+                                className={classes.imgpartner}
+                              />
+                            </Link>
+
+                            <Typography
+                              variant="caption"
+                              className={classes.partnercaption}
+                            >
+                              {item.name}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      );
+                    })}
                   </Grid>
                 </Grid>
               </Paper>
