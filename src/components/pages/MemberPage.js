@@ -12,6 +12,7 @@ import { connect } from "react-redux";
 
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
+import HttpIcon from "@material-ui/icons/Http";
 
 import ReactMarkdown from "react-markdown";
 import Paper from "@material-ui/core/Paper";
@@ -26,6 +27,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Link from "@material-ui/core/Link";
+import MaterialTable from "material-table";
 
 import languageDisplay from "../../functions/languageDisplay";
 
@@ -65,13 +67,19 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   card: {
-    minWidth: "80vw",
+    maxWidth: "40vw",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: "80vw",
+    },
     backgroundColor: `${theme.palette.primary.dark} `,
     color: `${theme.palette.secondary.light} `,
   },
   cardTitle: {},
   table: {
     color: `${theme.palette.secondary.light} `,
+  },
+  memberList: {
+    width: "90vw",
   },
 }));
 
@@ -88,6 +96,236 @@ const MemberPage = (props) => {
   const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
 
   const [openContact, setOpenContact] = useState(false);
+  let members = [];
+  let passiveMembers = [];
+  const columns = {
+    EN: [
+      {
+        title: "Logo",
+        field: "logo",
+        searchable: false,
+        sorting: false,
+
+        render: (rowData) => (
+          <img
+            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+            style={{ maxWidth: "50px", maxHeight: "50px" }}
+            alt="logo"
+          />
+        ),
+      },
+      {
+        title: "Name",
+        field: "name",
+        customSort: (a, b) => {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        },
+        defaultSort: "asc",
+      },
+      {
+        field: "website",
+        searchable: false,
+        sorting: false,
+        render: (rowData) => (
+          <Button
+            variant="outlined"
+            component={Link}
+            href={rowData.website}
+            target="_blank"
+            rel="noreferrer"
+            classes={{ root: classes.button }}
+          >
+            Website
+          </Button>
+        ),
+      },
+    ],
+    FR: [
+      {
+        title: "Logo",
+        field: "logo",
+        render: (rowData) => (
+          <img
+            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+            style={{ maxWidth: "50px", maxHeight: "50px" }}
+            alt="logo"
+          />
+        ),
+      },
+      {
+        title: "Nom",
+        field: "name",
+        customSort: (a, b) => {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        },
+        defaultSort: "asc",
+      },
+      {
+        field: "website",
+        render: (rowData) => (
+          <Button
+            variant="outlined"
+            component={Link}
+            href={rowData.website}
+            target="_blank"
+            rel="noreferrer"
+            classes={{ root: classes.button }}
+          >
+            Site Web
+          </Button>
+        ),
+      },
+    ],
+    DE: [
+      {
+        title: "Logo",
+        field: "logo",
+        render: (rowData) => (
+          <img
+            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+            style={{ maxWidth: "50px", maxHeight: "50px" }}
+            alt="logo"
+          />
+        ),
+      },
+      {
+        title: "Name",
+        field: "name",
+        customSort: (a, b) => {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        },
+        defaultSort: "asc",
+      },
+      {
+        field: "website",
+        render: (rowData) => (
+          <Button
+            variant="outlined"
+            component={Link}
+            href={rowData.website}
+            target="_blank"
+            rel="noreferrer"
+            classes={{ root: classes.button }}
+          >
+            Website
+          </Button>
+        ),
+      },
+    ],
+    IT: [
+      {
+        title: "Logo",
+        field: "logo",
+        render: (rowData) => (
+          <img
+            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+            style={{ maxWidth: "50px", maxHeight: "50px" }}
+            alt="logo"
+          />
+        ),
+      },
+      {
+        title: "Nuomo",
+        field: "name",
+        customSort: (a, b) => {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        },
+        defaultSort: "asc",
+      },
+      {
+        field: "website",
+        render: (rowData) => (
+          <Button
+            variant="outlined"
+            component={Link}
+            href={rowData.website}
+            target="_blank"
+            rel="noreferrer"
+            classes={{ root: classes.button }}
+          >
+            Sito web
+          </Button>
+        ),
+      },
+    ],
+    RO: [
+      {
+        title: "Simbol",
+        field: "logo",
+        render: (rowData) => (
+          <img
+            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+            style={{ maxWidth: "50px", maxHeight: "50px" }}
+            alt="logo"
+          />
+        ),
+      },
+      {
+        title: "Num",
+        field: "name",
+        customSort: (a, b) => {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        },
+        defaultSort: "asc",
+      },
+      {
+        field: "website",
+        render: (rowData) => (
+          <Button
+            variant="outlined"
+            component={Link}
+            href={rowData.website}
+            target="_blank"
+            rel="noreferrer"
+            classes={{ root: classes.button }}
+          >
+            Website
+          </Button>
+        ),
+      },
+    ],
+  };
+
   const handleContactOpen = () => {
     setOpenContact(true);
   };
@@ -100,6 +338,34 @@ const MemberPage = (props) => {
     <PageQuery query={MEMBERPAGE_QUERY}>
       {({ data: { memberPage } }) => {
         console.log(memberPage);
+
+        memberPage.memberlist.map((member) => {
+          if (!member.passive) {
+            if (member.abbreviation === null || member.abbreviation === "") {
+              members.push({
+                name: member.name,
+                logo: member.logo.url,
+                website: member.website,
+                training: member.training,
+              });
+            } else {
+              members.push({
+                name: member.abbreviation + " (" + member.name + ")",
+                logo: member.logo.url,
+                website: member.website,
+                training: member.training,
+              });
+            }
+          } else {
+            passiveMembers.push({
+              name: member.name,
+              logo: member.logo === null ? null : member.logo.url,
+              website: member.website,
+            });
+          }
+          return null;
+        });
+        console.log(members);
 
         return (
           <Paper className={classes.root}>
@@ -144,8 +410,81 @@ const MemberPage = (props) => {
               <Grid item id="map">
                 <p>map coming later</p>
               </Grid>
-              <Grid item id="memberList">
-                <p>memberlist coming later</p>
+              <Grid item id="memberList" className={classes.memberList}>
+                <MaterialTable
+                  title="memberlist"
+                  columns={
+                    languageDisplay(columns, props.language).props.children
+                  }
+                  data={members}
+                  options={{
+                    paging: false,
+                    searchText: "",
+                    showTitle: false,
+                  }}
+                  localization={{
+                    toolbar: {
+                      searchPlaceholder: languageDisplay(
+                        {
+                          EN: "Search",
+                          FR: "Recherche",
+                          DE: "Suche",
+                          IT: "Ricerca",
+                          RO: "Tschertgar",
+                        },
+                        props.language
+                      ).props.children,
+                    },
+                    body: {
+                      deleteTooltip: "Delete",
+                    },
+                  }}
+                  detailPanel={(rowData) => {
+                    console.log(rowData.training);
+
+                    return (
+                      <Grid
+                        container
+                        direction="row"
+                        justify="flex-start"
+                        alignItems="center"
+                      >
+                        {rowData.training.map((training, i) => {
+                          return (
+                            <Grid item key={i}>
+                              <Grid
+                                container
+                                direction="row"
+                                justify="flex-start"
+                                alignItems="center"
+                              >
+                                <Grid item>
+                                  <Typography variant="body2">
+                                    {training.location}
+                                  </Typography>
+                                </Grid>
+                                <Grid item>
+                                  <Grid container direction="column">
+                                    {training.hours.map((hour, i) => {
+                                      return (
+                                        <Grid item key={i}>
+                                          <Typography variant="caption">
+                                            {hour.start} - {hour.end}
+                                          </Typography>
+                                        </Grid>
+                                      );
+                                    })}
+                                  </Grid>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+                    );
+                  }}
+                  onRowClick={(event, rowData, togglePanel) => togglePanel()}
+                />
               </Grid>
               <Grid item id="passiveMembers">
                 <Typography
@@ -202,7 +541,7 @@ const MemberPage = (props) => {
                               props.language
                             )}
                           </TableCell>
-                          <TableCell className={classes.table}>
+                          <TableCell className={classes.table} align="right">
                             {languageDisplay(
                               {
                                 EN: "Website",
@@ -223,7 +562,10 @@ const MemberPage = (props) => {
                               <TableCell className={classes.table}>
                                 {group.name}
                               </TableCell>
-                              <TableCell className={classes.table}>
+                              <TableCell
+                                className={classes.table}
+                                align="right"
+                              >
                                 <Link
                                   href={group.link}
                                   color="inherit"
