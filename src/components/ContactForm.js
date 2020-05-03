@@ -16,6 +16,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
 import languageDisplay from "../functions/languageDisplay";
+import { mailSent, mandatory, send, closeLabel } from "../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
   question: {
@@ -36,8 +37,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {};
 };
 
-//TODO: make sure state is flushed on close without having flash of undone form
-
 const Form = (props) => {
   const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
   const classes = useStyles();
@@ -57,13 +56,6 @@ const Form = (props) => {
       wrongInput: true,
     },
   });
-  const finalMsg = {
-    FR: "Votre mail a été envoyé avec succès",
-    EN: "Your mail was sent successfully",
-    DE: "Ihre Mail wurde erfolgreich gesendet",
-    IT: "La tua posta è stata inviata con successo",
-    RO: "Your mail was sent successfully",
-  };
 
   const handleClose = () => {
     props.close();
@@ -306,24 +298,14 @@ const Form = (props) => {
           })
         ) : (
           <DialogContentText>
-            {languageDisplay(finalMsg, props.language)}
+            {languageDisplay(mailSent, props.language)}
           </DialogContentText>
         )}
       </DialogContent>
       <DialogActions>
         {disabled ? (
           <FormHelperText>
-            *{" "}
-            {languageDisplay(
-              {
-                FR: "Obligatoire",
-                EN: "Mandatory",
-                DE: "Obligatorisch",
-                IT: "Obbligatorio",
-                RO: "Stuair",
-              },
-              props.language
-            )}
+            * {languageDisplay(mandatory, props.language)}
           </FormHelperText>
         ) : null}
         {!confirmationVisible ? (
@@ -334,31 +316,13 @@ const Form = (props) => {
               disabled={disabled}
               onClick={submitForm}
             >
-              {languageDisplay(
-                {
-                  EN: "Submit",
-                  FR: "Envoyer",
-                  DE: "Senden",
-                  IT: "Spedire",
-                  RO: "Spedir",
-                },
-                props.language
-              )}
+              {languageDisplay(send, props.language)}
             </Button>
           </div>
         ) : null}
 
         <Button color="primary" onClick={handleClose}>
-          {languageDisplay(
-            {
-              EN: "Close",
-              FR: "Fermer",
-              DE: "Schliessen",
-              IT: "Chiudere",
-              RO: "Finir",
-            },
-            props.language
-          )}
+          {languageDisplay(closeLabel, props.language)}
         </Button>
       </DialogActions>
     </Dialog>

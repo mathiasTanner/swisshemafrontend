@@ -28,8 +28,12 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Link from "@material-ui/core/Link";
 import MaterialTable from "material-table";
+import Moment from "react-moment";
+import Box from "@material-ui/core/Box";
 
 import languageDisplay from "../../functions/languageDisplay";
+import daySelector from "../../functions/daySelector";
+import { name, website, search } from "../../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,6 +83,22 @@ const useStyles = makeStyles((theme) => ({
     color: `${theme.palette.secondary.light} `,
   },
   memberList: {
+    width: "90vw",
+  },
+  trainingcontainer: {
+    margin: "15px",
+  },
+  daycontainer: {
+    margin: "15px",
+  },
+  hourcontainer: {
+    margin: "15px",
+  },
+  elementContainers: {
+    margin: "5vh",
+    maxWidth: "90vw",
+  },
+  passiveTable: {
     width: "90vw",
   },
 }));
@@ -365,7 +385,6 @@ const MemberPage = (props) => {
           }
           return null;
         });
-        console.log(members);
 
         return (
           <Paper className={classes.root}>
@@ -424,53 +443,71 @@ const MemberPage = (props) => {
                   }}
                   localization={{
                     toolbar: {
-                      searchPlaceholder: languageDisplay(
-                        {
-                          EN: "Search",
-                          FR: "Recherche",
-                          DE: "Suche",
-                          IT: "Ricerca",
-                          RO: "Tschertgar",
-                        },
-                        props.language
-                      ).props.children,
+                      searchPlaceholder: languageDisplay(search, props.language)
+                        .props.children,
                     },
                     body: {
                       deleteTooltip: "Delete",
                     },
                   }}
                   detailPanel={(rowData) => {
-                    console.log(rowData.training);
-
                     return (
                       <Grid
                         container
-                        direction="row"
+                        direction={isMobile ? "column" : "row"}
                         justify="flex-start"
                         alignItems="center"
                       >
                         {rowData.training.map((training, i) => {
                           return (
-                            <Grid item key={i}>
+                            <Grid
+                              item
+                              key={i}
+                              className={classes.trainingcontainer}
+                            >
                               <Grid
                                 container
-                                direction="row"
+                                direction={isMobile ? "column" : "row"}
                                 justify="flex-start"
                                 alignItems="center"
                               >
-                                <Grid item>
-                                  <Typography variant="body2">
-                                    {training.location}
+                                <Grid item className={classes.daycontainer}>
+                                  <Typography variant="subtitle2">
+                                    <Box fontWeight="fontWeightBold">
+                                      {training.location}:
+                                    </Box>
                                   </Typography>
                                 </Grid>
-                                <Grid item>
+                                <Grid item className={classes.timecontainer}>
                                   <Grid container direction="column">
                                     {training.hours.map((hour, i) => {
                                       return (
                                         <Grid item key={i}>
                                           <Typography variant="caption">
-                                            {hour.start} - {hour.end}
+                                            <Box fontWeight="fontWeightBold">
+                                              {daySelector(
+                                                hour.day,
+                                                props.language
+                                              )}
+                                            </Box>
                                           </Typography>
+                                          {hour.start !== null ? (
+                                            <Typography variant="caption">
+                                              <Moment
+                                                parse="HH:mm"
+                                                format="HH:mm"
+                                              >
+                                                {hour.start}
+                                              </Moment>
+                                              -
+                                              <Moment
+                                                parse="HH:mm"
+                                                format="HH:mm"
+                                              >
+                                                {hour.end}
+                                              </Moment>
+                                            </Typography>
+                                          ) : null}
                                         </Grid>
                                       );
                                     })}
@@ -486,7 +523,11 @@ const MemberPage = (props) => {
                   onRowClick={(event, rowData, togglePanel) => togglePanel()}
                 />
               </Grid>
-              <Grid item id="passiveMembers">
+              <Grid
+                item
+                id="passiveMembers"
+                className={classes.elementContainers}
+              >
                 <Typography
                   variant={isMobile ? "h6" : "h5"}
                   className={classes.header}
@@ -498,9 +539,60 @@ const MemberPage = (props) => {
                 </Typography>
               </Grid>
               <Grid item id="passiveList">
-                passive memberlist comming soon
+                <Table className={classes.passiveTable}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Logo </TableCell>
+                      <TableCell>
+                        {languageDisplay(name, props.language)}
+                      </TableCell>
+                      <TableCell>
+                        {languageDisplay(website, props.language)}
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {passiveMembers.map((member, i) => {
+                      return (
+                        <TableRow key={i}>
+                          <TableCell>
+                            {member.logo == null ? (
+                              "/"
+                            ) : (
+                              <img
+                                src={
+                                  process.env.REACT_APP_BACKEND_URL +
+                                  member.logo
+                                }
+                                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                                alt="logo"
+                              />
+                            )}
+                          </TableCell>
+                          <TableCell>{member.name}</TableCell>
+                          <TableCell>
+                            {member.website == null || member.website === "" ? (
+                              "/"
+                            ) : (
+                              <Button
+                                variant="outlined"
+                                component={Link}
+                                href={member.website}
+                                target="_blank"
+                                rel="noreferrer"
+                                classes={{ root: classes.button }}
+                              >
+                                {languageDisplay(website, props.language)}
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </Grid>
-              <Grid item id="otherGroups">
+              <Grid item id="otherGroups" className={classes.elementContainers}>
                 <Card className={classes.card}>
                   <CardContent>
                     <Typography
@@ -522,36 +614,14 @@ const MemberPage = (props) => {
                         ).props.children
                       }
                     />
-                    <Table
-                      className={classes.table}
-                      size="small"
-                      aria-label="other-table"
-                    >
-                      <TableHead className={classes.table}>
-                        <TableRow className={classes.table}>
+                    <Table size="small" aria-label="other-table">
+                      <TableHead>
+                        <TableRow>
                           <TableCell className={classes.table}>
-                            {languageDisplay(
-                              {
-                                EN: "Name",
-                                FR: "Nom",
-                                DE: "Name",
-                                IT: "Nome",
-                                RO: "num",
-                              },
-                              props.language
-                            )}
+                            {languageDisplay(name, props.language)}
                           </TableCell>
                           <TableCell className={classes.table} align="right">
-                            {languageDisplay(
-                              {
-                                EN: "Website",
-                                FR: "Site web",
-                                DE: "Website",
-                                IT: "Sito web",
-                                RO: "Website",
-                              },
-                              props.language
-                            )}
+                            {languageDisplay(website, props.language)}
                           </TableCell>
                         </TableRow>
                       </TableHead>

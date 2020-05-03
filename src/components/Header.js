@@ -31,6 +31,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
 import languageDisplay from "../functions/languageDisplay";
+import { menu } from "../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
   logoButton: {
@@ -288,16 +289,7 @@ const Header = (props) => {
                         startIcon={<MenuIcon />}
                         onClick={toggleDrawer(true)}
                       >
-                        {languageDisplay(
-                          {
-                            FR: "Menu",
-                            EN: "Menu",
-                            DE: "Menü",
-                            IT: "Menu",
-                            RO: "Menu",
-                          },
-                          props.language
-                        )}
+                        {languageDisplay(menu, props.language)}
                       </Button>
                     </Hidden>
                     <Hidden mdUp>
@@ -324,16 +316,7 @@ const Header = (props) => {
                             component="div"
                             id="nested-list-subheader"
                           >
-                            {languageDisplay(
-                              {
-                                FR: "Menu",
-                                EN: "Menu",
-                                DE: "Menü",
-                                IT: "Menu",
-                                RO: "Menu",
-                              },
-                              props.language
-                            )}
+                            {languageDisplay(menu, props.language)}
                           </ListSubheader>
                         }
                       >
