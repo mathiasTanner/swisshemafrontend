@@ -18,6 +18,7 @@ import AboutUs from "./components/pages/AboutUs.js";
 import MemberPage from "./components/pages/MemberPage.js";
 import Events from "./components/pages/events/Events.js";
 import Evenment from "./components/pages/events/Evenment.js";
+import International from "./components/pages/International";
 import Calendar from "./components/pages/events/Calendar.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -65,6 +66,7 @@ function App() {
                 <Evenment path="/bearcup" name="Bear Cup" />
                 <Evenment path="/instructorcamp" name="Intructor Boot Camp" />
                 <Calendar path="/calendar" />
+                <International path="/international" />
                 <AboutUs path="/" />
               </Router>
             </Grid>

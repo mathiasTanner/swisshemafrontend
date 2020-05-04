@@ -801,7 +801,7 @@ const MemberPage = (props) => {
                 </Card>
               </Grid>
             </Grid>
-            <span>{props.width}</span>
+
             <Query query={FORM_QUERY} id={memberPage.form.id}>
               {({ data: { form } }) => {
                 return (
