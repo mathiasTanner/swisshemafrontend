@@ -43,7 +43,7 @@ import { name, website, search } from "../../JSONdata/label";
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "15px",
-    padding: "5px",
+    padding: "15px",
   },
   title: {
     padding: "15px",
@@ -801,7 +801,7 @@ const MemberPage = (props) => {
                 </Card>
               </Grid>
             </Grid>
-            <span>{props.width}</span>
+
             <Query query={FORM_QUERY} id={memberPage.form.id}>
               {({ data: { form } }) => {
                 return (
