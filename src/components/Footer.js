@@ -26,6 +26,7 @@ import FORM_QUERY from "../queries/forms/form";
 import ContactForm from "./ContactForm";
 
 import languageDisplay from "../functions/languageDisplay";
+import { closeLabel, send } from "../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -152,16 +153,7 @@ const Footer = (props) => {
           </DialogContent>
           <DialogActions>
             <Button autoFocus onClick={handleNewsClose} color="primary">
-              {languageDisplay(
-                {
-                  EN: "Close",
-                  FR: "Fermer",
-                  DE: "Schliessen",
-                  IT: "Chiudere",
-                  RO: "Finir",
-                },
-                props.language
-              )}
+              {languageDisplay(closeLabel, props.language)}
             </Button>
             <Button
               color="primary"
@@ -169,16 +161,7 @@ const Footer = (props) => {
               type="submit"
               onClick={handleNewsClose}
             >
-              {languageDisplay(
-                {
-                  EN: "Submit",
-                  FR: "Envoyer",
-                  DE: "Senden",
-                  IT: "Spedire",
-                  RO: "Spedir",
-                },
-                props.language
-              )}
+              {languageDisplay(send, props.language)}
             </Button>
           </DialogActions>
         </form>
