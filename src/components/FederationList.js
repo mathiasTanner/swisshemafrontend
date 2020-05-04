@@ -119,7 +119,8 @@ const FederationList = (props) => {
                   </Grid>
                 )}
               </ListItem>
-              <Divider />
+
+              {i === props.list.length - 1 ? null : <Divider />}
             </div>
           );
         })}

@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
       marginTop: "9vh",
     },
     [theme.breakpoints.up("md")]: {
-      marginTop: "13vh",
+      marginTop: "12vh",
     },
     backgroundColor: `${theme.palette.secondary.main} `,
     margin: "auto",

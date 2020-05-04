@@ -20,7 +20,7 @@ import languageDisplay from "../../functions/languageDisplay";
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "15px",
-    padding: "5px",
+    padding: "15px",
   },
   title: {
     padding: "15px",
@@ -48,7 +48,9 @@ const useStyles = makeStyles((theme) => ({
       maxWidth: "90%",
     },
   },
-  list: {},
+  list: {
+    margin: "10px",
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {

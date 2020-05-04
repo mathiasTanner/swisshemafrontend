@@ -43,7 +43,7 @@ import { name, website, search } from "../../JSONdata/label";
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "15px",
-    padding: "5px",
+    padding: "15px",
   },
   title: {
     padding: "15px",
