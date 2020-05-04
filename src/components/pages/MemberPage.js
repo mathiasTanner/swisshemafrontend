@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PageQuery from "../PageQuery";
 import Query from "../Query";
 import MEMBERPAGE_QUERY from "../../queries/memberpage";
@@ -12,13 +12,18 @@ import { connect } from "react-redux";
 
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
-import HttpIcon from "@material-ui/icons/Http";
+
+import GoogleMapReact from "google-map-react";
+import { mapsKey, mapCenter } from "../../GoogleApi";
+import Marker from "../Marker";
 
 import ReactMarkdown from "react-markdown";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import HttpIcon from "@material-ui/icons/Http";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Table from "@material-ui/core/Table";
@@ -73,17 +78,25 @@ const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: "40vw",
     [theme.breakpoints.down("sm")]: {
-      maxWidth: "80vw",
+      maxWidth: "75vw",
     },
     backgroundColor: `${theme.palette.primary.dark} `,
     color: `${theme.palette.secondary.light} `,
   },
   cardTitle: {},
   table: {
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "650",
+    },
+  },
+  tablecell: {
     color: `${theme.palette.secondary.light} `,
   },
   memberList: {
     width: "90vw",
+    [theme.breakpoints.down("xs")]: {
+      maxWidth: "80vw",
+    },
   },
   trainingcontainer: {
     margin: "15px",
@@ -101,6 +114,14 @@ const useStyles = makeStyles((theme) => ({
   passiveTable: {
     width: "90vw",
   },
+  map: {
+    margin: "2vh",
+    height: "60vh",
+    width: "90vw",
+    [theme.breakpoints.down("xs")]: {
+      maxWidth: "80vw",
+    },
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -113,11 +134,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 const MemberPage = (props) => {
   const classes = useStyles();
-  const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("xs"));
 
   const [openContact, setOpenContact] = useState(false);
+
   let members = [];
   let passiveMembers = [];
+  let locationList = [];
+
   const columns = {
     EN: [
       {
@@ -126,13 +150,22 @@ const MemberPage = (props) => {
         searchable: false,
         sorting: false,
 
-        render: (rowData) => (
-          <img
-            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
-            style={{ maxWidth: "50px", maxHeight: "50px" }}
-            alt="logo"
-          />
-        ),
+        render: (rowData) =>
+          isMobile ? (
+            <Link href={rowData.website} target="_blank" rel="noreferrer">
+              <img
+                src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                alt="logo"
+              />
+            </Link>
+          ) : (
+            <img
+              src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+              style={{ maxWidth: "50px", maxHeight: "50px" }}
+              alt="logo"
+            />
+          ),
       },
       {
         title: "Name",
@@ -154,31 +187,41 @@ const MemberPage = (props) => {
         field: "website",
         searchable: false,
         sorting: false,
-        render: (rowData) => (
-          <Button
-            variant="outlined"
-            component={Link}
-            href={rowData.website}
-            target="_blank"
-            rel="noreferrer"
-            classes={{ root: classes.button }}
-          >
-            Website
-          </Button>
-        ),
+        render: (rowData) =>
+          isMobile ? null : (
+            <Button
+              variant="outlined"
+              component={Link}
+              href={rowData.website}
+              target="_blank"
+              rel="noreferrer"
+              classes={{ root: classes.button }}
+            >
+              Website
+            </Button>
+          ),
       },
     ],
     FR: [
       {
         title: "Logo",
         field: "logo",
-        render: (rowData) => (
-          <img
-            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
-            style={{ maxWidth: "50px", maxHeight: "50px" }}
-            alt="logo"
-          />
-        ),
+        render: (rowData) =>
+          isMobile ? (
+            <Link href={rowData.website} target="_blank" rel="noreferrer">
+              <img
+                src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                alt="logo"
+              />
+            </Link>
+          ) : (
+            <img
+              src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+              style={{ maxWidth: "50px", maxHeight: "50px" }}
+              alt="logo"
+            />
+          ),
       },
       {
         title: "Nom",
@@ -198,31 +241,41 @@ const MemberPage = (props) => {
       },
       {
         field: "website",
-        render: (rowData) => (
-          <Button
-            variant="outlined"
-            component={Link}
-            href={rowData.website}
-            target="_blank"
-            rel="noreferrer"
-            classes={{ root: classes.button }}
-          >
-            Site Web
-          </Button>
-        ),
+        render: (rowData) =>
+          isMobile ? null : (
+            <Button
+              variant="outlined"
+              component={Link}
+              href={rowData.website}
+              target="_blank"
+              rel="noreferrer"
+              classes={{ root: classes.button }}
+            >
+              Site Web
+            </Button>
+          ),
       },
     ],
     DE: [
       {
         title: "Logo",
         field: "logo",
-        render: (rowData) => (
-          <img
-            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
-            style={{ maxWidth: "50px", maxHeight: "50px" }}
-            alt="logo"
-          />
-        ),
+        render: (rowData) =>
+          isMobile ? (
+            <Link href={rowData.website} target="_blank" rel="noreferrer">
+              <img
+                src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                alt="logo"
+              />
+            </Link>
+          ) : (
+            <img
+              src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+              style={{ maxWidth: "50px", maxHeight: "50px" }}
+              alt="logo"
+            />
+          ),
       },
       {
         title: "Name",
@@ -242,31 +295,41 @@ const MemberPage = (props) => {
       },
       {
         field: "website",
-        render: (rowData) => (
-          <Button
-            variant="outlined"
-            component={Link}
-            href={rowData.website}
-            target="_blank"
-            rel="noreferrer"
-            classes={{ root: classes.button }}
-          >
-            Website
-          </Button>
-        ),
+        render: (rowData) =>
+          isMobile ? null : (
+            <Button
+              variant="outlined"
+              component={Link}
+              href={rowData.website}
+              target="_blank"
+              rel="noreferrer"
+              classes={{ root: classes.button }}
+            >
+              Website
+            </Button>
+          ),
       },
     ],
     IT: [
       {
         title: "Logo",
         field: "logo",
-        render: (rowData) => (
-          <img
-            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
-            style={{ maxWidth: "50px", maxHeight: "50px" }}
-            alt="logo"
-          />
-        ),
+        render: (rowData) =>
+          isMobile ? (
+            <Link href={rowData.website} target="_blank" rel="noreferrer">
+              <img
+                src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                alt="logo"
+              />
+            </Link>
+          ) : (
+            <img
+              src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+              style={{ maxWidth: "50px", maxHeight: "50px" }}
+              alt="logo"
+            />
+          ),
       },
       {
         title: "Nuomo",
@@ -286,31 +349,41 @@ const MemberPage = (props) => {
       },
       {
         field: "website",
-        render: (rowData) => (
-          <Button
-            variant="outlined"
-            component={Link}
-            href={rowData.website}
-            target="_blank"
-            rel="noreferrer"
-            classes={{ root: classes.button }}
-          >
-            Sito web
-          </Button>
-        ),
+        render: (rowData) =>
+          isMobile ? null : (
+            <Button
+              variant="outlined"
+              component={Link}
+              href={rowData.website}
+              target="_blank"
+              rel="noreferrer"
+              classes={{ root: classes.button }}
+            >
+              Sito web
+            </Button>
+          ),
       },
     ],
     RO: [
       {
         title: "Simbol",
         field: "logo",
-        render: (rowData) => (
-          <img
-            src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
-            style={{ maxWidth: "50px", maxHeight: "50px" }}
-            alt="logo"
-          />
-        ),
+        render: (rowData) =>
+          isMobile ? (
+            <Link href={rowData.website} target="_blank" rel="noreferrer">
+              <img
+                src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+                style={{ maxWidth: "50px", maxHeight: "50px" }}
+                alt="logo"
+              />
+            </Link>
+          ) : (
+            <img
+              src={process.env.REACT_APP_BACKEND_URL + rowData.logo}
+              style={{ maxWidth: "50px", maxHeight: "50px" }}
+              alt="logo"
+            />
+          ),
       },
       {
         title: "Num",
@@ -330,18 +403,19 @@ const MemberPage = (props) => {
       },
       {
         field: "website",
-        render: (rowData) => (
-          <Button
-            variant="outlined"
-            component={Link}
-            href={rowData.website}
-            target="_blank"
-            rel="noreferrer"
-            classes={{ root: classes.button }}
-          >
-            Website
-          </Button>
-        ),
+        render: (rowData) =>
+          isMobile ? null : (
+            <Button
+              variant="outlined"
+              component={Link}
+              href={rowData.website}
+              target="_blank"
+              rel="noreferrer"
+              classes={{ root: classes.button }}
+            >
+              Website
+            </Button>
+          ),
       },
     ],
   };
@@ -354,13 +428,27 @@ const MemberPage = (props) => {
     setOpenContact(false);
   };
 
+  //TODO: search by canton function: JSON file with all the cantons and their center corrdinate, filter list by cantons, fltered list that render the markers
+
   return (
     <PageQuery query={MEMBERPAGE_QUERY}>
       {({ data: { memberPage } }) => {
-        console.log(memberPage);
-
         memberPage.memberlist.map((member) => {
           if (!member.passive) {
+            member.location.map((location) => {
+              locationList.push({
+                name:
+                  member.abbreviation === null || member.abbreviation === ""
+                    ? member.name
+                    : member.abbreviation,
+                logo: member.logo,
+                canton: location.Canton,
+                lat: location.latitude,
+                lng: location.longitude,
+                website: member.webite,
+              });
+              return null;
+            });
             if (member.abbreviation === null || member.abbreviation === "") {
               members.push({
                 name: member.name,
@@ -383,6 +471,7 @@ const MemberPage = (props) => {
               website: member.website,
             });
           }
+
           return null;
         });
 
@@ -426,8 +515,25 @@ const MemberPage = (props) => {
                   )}
                 </Button>
               </Grid>
-              <Grid item id="map">
-                <p>map coming later</p>
+              <Grid item id="map" className={classes.map}>
+                <GoogleMapReact
+                  bootstrapURLKeys={{
+                    key: mapsKey,
+                  }}
+                  defaultCenter={mapCenter}
+                  defaultZoom={isMobile ? 6.5 : 8}
+                >
+                  {locationList.map((location, i) => {
+                    return (
+                      <Marker
+                        location={location}
+                        key={i}
+                        lat={location.lat}
+                        lng={location.lng}
+                      />
+                    );
+                  })}
+                </GoogleMapReact>
               </Grid>
               <Grid item id="memberList" className={classes.memberList}>
                 <MaterialTable
@@ -546,9 +652,11 @@ const MemberPage = (props) => {
                       <TableCell>
                         {languageDisplay(name, props.language)}
                       </TableCell>
-                      <TableCell>
-                        {languageDisplay(website, props.language)}
-                      </TableCell>
+                      {isMobile ? null : (
+                        <TableCell>
+                          {languageDisplay(website, props.language)}
+                        </TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -569,23 +677,43 @@ const MemberPage = (props) => {
                               />
                             )}
                           </TableCell>
-                          <TableCell>{member.name}</TableCell>
                           <TableCell>
-                            {member.website == null || member.website === "" ? (
-                              "/"
+                            {isMobile ? (
+                              member.website === null ||
+                              member.website === "" ? (
+                                member.name
+                              ) : (
+                                <Link
+                                  href={member.website}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {member.name}
+                                </Link>
+                              )
                             ) : (
-                              <Button
-                                variant="outlined"
-                                component={Link}
-                                href={member.website}
-                                target="_blank"
-                                rel="noreferrer"
-                                classes={{ root: classes.button }}
-                              >
-                                {languageDisplay(website, props.language)}
-                              </Button>
+                              member.name
                             )}
                           </TableCell>
+                          {isMobile ? null : (
+                            <TableCell>
+                              {member.website == null ||
+                              member.website === "" ? (
+                                "/"
+                              ) : (
+                                <Button
+                                  variant="outlined"
+                                  component={Link}
+                                  href={member.website}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  classes={{ root: classes.button }}
+                                >
+                                  {languageDisplay(website, props.language)}
+                                </Button>
+                              )}
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })}
@@ -614,13 +742,20 @@ const MemberPage = (props) => {
                         ).props.children
                       }
                     />
-                    <Table size="small" aria-label="other-table">
+                    <Table
+                      size={isMobile ? "medium" : "small"}
+                      aria-label="other-table"
+                      className="table"
+                    >
                       <TableHead>
                         <TableRow>
-                          <TableCell className={classes.table}>
+                          <TableCell className={classes.tablecell}>
                             {languageDisplay(name, props.language)}
                           </TableCell>
-                          <TableCell className={classes.table} align="right">
+                          <TableCell
+                            className={classes.tablecell}
+                            align={isMobile ? "left" : "right"}
+                          >
                             {languageDisplay(website, props.language)}
                           </TableCell>
                         </TableRow>
@@ -629,21 +764,33 @@ const MemberPage = (props) => {
                         {memberPage.groups.map((group, i) => {
                           return (
                             <TableRow key={i}>
-                              <TableCell className={classes.table}>
+                              <TableCell className={classes.tablecell}>
                                 {group.name}
                               </TableCell>
                               <TableCell
-                                className={classes.table}
-                                align="right"
+                                className={classes.tablecell}
+                                align={isMobile ? "left" : "right"}
                               >
-                                <Link
-                                  href={group.link}
-                                  color="inherit"
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  {group.link}
-                                </Link>
+                                {isMobile ? (
+                                  <IconButton
+                                    color="secondary"
+                                    component={Link}
+                                    href={group.link}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    <HttpIcon size="medium" />
+                                  </IconButton>
+                                ) : (
+                                  <Link
+                                    href={group.link}
+                                    color="inherit"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {group.link}
+                                  </Link>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
