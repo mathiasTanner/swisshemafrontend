@@ -31,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("xs")]: {
       marginTop: "9vh",
     },
-    [theme.breakpoints.up("md")]: {
+
+    [theme.breakpoints.up("lg")]: {
       marginTop: "12vh",
     },
     backgroundColor: `${theme.palette.secondary.main} `,
@@ -46,7 +47,11 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <Provider store={Store}>
-        <div className="App" data-testid="app">
+        <div
+          className="App"
+          data-testid="app"
+          style={{ backgroundColor: "#e2e2e2" }}
+        >
           <CssBaseline />
 
           <Grid container spacing={0}>
