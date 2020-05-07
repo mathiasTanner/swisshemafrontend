@@ -2,9 +2,9 @@ import React from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Skeleton from "@material-ui/lab/Skeleton";
 
-const PageQuery = ({ children, query, id, code }) => {
+const PageQuery = ({ children, query, id, code, name }) => {
   const { data, loading, error } = useQuery(query, {
-    variables: { id: id, code: code },
+    variables: { id: id, code: code, name: name },
   });
 
   if (loading) return <Skeleton variant="text" animation="wave" />;

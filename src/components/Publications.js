@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
   expansion: {
     width: "60vw",
     margin: "5px",
+    padding: "15px",
     backgroundColor: `${theme.palette.primary.dark} `,
     color: `${theme.palette.secondary.light} `,
   },
@@ -112,7 +113,9 @@ const Publications = (props) => {
                 </Grid>
               </Grid>
             </ExpansionPanelDetails>
-            {publication.category === "event" ? (
+            {publication.categories.filter(
+              (category) => category.name === "event"
+            ).length > 0 ? (
               <ExpansionPanelActions>
                 <Button
                   component={Link}

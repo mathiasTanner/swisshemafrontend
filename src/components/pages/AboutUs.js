@@ -6,6 +6,7 @@ import Query from "../Query";
 import Publications from "../Publications";
 
 import { connect } from "react-redux";
+import { fetchPublications } from "../../actions";
 
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: `${theme.palette.secondary.light} `,
     margin: "10px",
     padding: "15px",
+    [theme.breakpoints.down("xs")]: {
+      paddingTop: "35px",
+      margin: "0px",
+    },
   },
   hemaDef: {
     margin: "5px",
@@ -111,7 +116,11 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  return {};
+  return {
+    storePublications: (publcations) => {
+      dispatch(fetchPublications(publcations));
+    },
+  };
 };
 
 const AboutUs = (props) => {
@@ -254,6 +263,7 @@ const AboutUs = (props) => {
                 <Grid container justify="center">
                   <Query query={PUBLICATIONS_QUERY}>
                     {({ data: { publications } }) => {
+                      props.storePublications(publications);
                       return <Publications publications={publications} />;
                     }}
                   </Query>

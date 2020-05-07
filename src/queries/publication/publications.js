@@ -3,7 +3,9 @@ import gql from "graphql-tag";
 const PUBLICATIONS_QUERY = gql`
   query Publications {
     publications {
-      category
+      categories {
+        name
+      }
       title {
         FR
         DE
