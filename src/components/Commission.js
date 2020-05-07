@@ -77,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
   mediaArea: {
     margin: "auto",
+    textAlign: "center",
   },
   table: {
     width: "90vw",
