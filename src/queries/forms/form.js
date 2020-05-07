@@ -17,6 +17,12 @@ const FORM_QUERY = gql`
         EN
         FR
         DE
+        options {
+          EN
+          FR
+          DE
+          value
+        }
       }
     }
   }

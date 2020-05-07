@@ -6,6 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import HEADER_QUERY from "./queries/header";
 import FOOTER_QUERY from "./queries/footer";
+
 import Query from "./components/Query";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -19,6 +20,7 @@ import MemberPage from "./components/pages/MemberPage.js";
 import Events from "./components/pages/events/Events.js";
 import Evenment from "./components/pages/events/Evenment.js";
 import International from "./components/pages/International";
+import CommissionsPage from "./components/pages/CommissionsPage";
 import Calendar from "./components/pages/events/Calendar.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -50,11 +52,10 @@ function App() {
         <div
           className="App"
           data-testid="app"
-          style={{ backgroundColor: "#e2e2e2" }}
+          style={{ backgroundColor: "#e2e2e2", height: "100vh" }}
         >
           <CssBaseline />
-
-          <Grid container spacing={0}>
+          <Grid container spacing={0} style={{ backgroundColor: "#e2e2e2" }}>
             <Grid item xs={12} id="header" className={classes.header}>
               <Query query={HEADER_QUERY} id={null}>
                 {({ data: { header } }) => {
@@ -72,6 +73,7 @@ function App() {
                 <Evenment path="/instructorcamp" name="Intructor Boot Camp" />
                 <Calendar path="/calendar" />
                 <International path="/international" />
+                <CommissionsPage path="/commissions" />
                 <AboutUs path="/" />
               </Router>
             </Grid>

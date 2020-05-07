@@ -61,3 +61,35 @@ export const mandatory = {
   IT: "Obbligatorio",
   RO: "Stuair",
 };
+
+export const document = {
+  EN: "Document",
+  FR: "Documemt",
+  DE: "Dokument",
+  IT: "Documento",
+  RO: "Palpiri",
+};
+
+export const download = {
+  EN: "Download",
+  FR: "Télécharger",
+  DE: "Herunterladen",
+  IT: "Scarica",
+  RO: "Download",
+};
+
+export const show = {
+  EN: "Show",
+  FR: "Voir",
+  DE: "Zeigen",
+  IT: "Mostrare",
+  RO: "Mussar",
+};
+
+export const uploadLabel = {
+  EN: "Drag and drop a file here or click",
+  FR: "Cliquez ou glissez le document ici",
+  DE: "Klicken oder ziehen Sie das Dokument hier",
+  IT: "Fai clic o trascina qui il documento",
+  RO: "Upload",
+};
