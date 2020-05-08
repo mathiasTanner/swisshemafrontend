@@ -85,6 +85,10 @@ const useStyles = makeStyles((theme) => ({
   expansion: {
     margin: "5px",
     padding: "15px",
+    [theme.breakpoints.down("xs")]: {
+      margin: "0px",
+      maxWidth: "90vw",
+    },
   },
   heading: {
     textAlign: "center",
@@ -203,7 +207,7 @@ const Commission = (props) => {
                 : null}
             </Grid>
 
-            {commission.name !== "media" || isMobile ? null : (
+            {commission.name !== "media" ? null : (
               <Grid
                 item
                 id="commission-media-area"
@@ -242,30 +246,35 @@ const Commission = (props) => {
                             props.language
                           )}
                         </TableCell>
-                        <TableCell id="media-table-head-author">
-                          {languageDisplay(
-                            commission.mediaLabels.find(
-                              ({ identifier }) => identifier === "authorLabel"
-                            ),
-                            props.language
-                          )}
-                        </TableCell>
-                        <TableCell id="media-table-head-date">
-                          {languageDisplay(
-                            commission.mediaLabels.find(
-                              ({ identifier }) => identifier === "dateLabel"
-                            ),
-                            props.language
-                          )}
-                        </TableCell>
-                        <TableCell id="media-table-head-type">
-                          {languageDisplay(
-                            commission.mediaLabels.find(
-                              ({ identifier }) => identifier === "typeLabel"
-                            ),
-                            props.language
-                          )}
-                        </TableCell>
+                        {isMobile ? null : (
+                          <>
+                            <TableCell id="media-table-head-author">
+                              {languageDisplay(
+                                commission.mediaLabels.find(
+                                  ({ identifier }) =>
+                                    identifier === "authorLabel"
+                                ),
+                                props.language
+                              )}
+                            </TableCell>
+                            <TableCell id="media-table-head-date">
+                              {languageDisplay(
+                                commission.mediaLabels.find(
+                                  ({ identifier }) => identifier === "dateLabel"
+                                ),
+                                props.language
+                              )}
+                            </TableCell>
+                            <TableCell id="media-table-head-type">
+                              {languageDisplay(
+                                commission.mediaLabels.find(
+                                  ({ identifier }) => identifier === "typeLabel"
+                                ),
+                                props.language
+                              )}
+                            </TableCell>
+                          </>
+                        )}
                         <TableCell id="media-table-head-link">
                           {languageDisplay(
                             commission.mediaLabels.find(
@@ -283,17 +292,21 @@ const Commission = (props) => {
                             <TableCell id="media-table-name">
                               {languageDisplay(element.name, props.language)}
                             </TableCell>
-                            <TableCell id="media-table-author">
-                              {element.author}
-                            </TableCell>
-                            <TableCell id="media-table-date">
-                              <Moment format="DD/MM/YYYY">
-                                {element.date}
-                              </Moment>
-                            </TableCell>
-                            <TableCell id="media-table-type">
-                              {displayType(element.type, props.language)}
-                            </TableCell>
+                            {isMobile ? null : (
+                              <>
+                                <TableCell id="media-table-author">
+                                  {element.author}
+                                </TableCell>
+                                <TableCell id="media-table-date">
+                                  <Moment format="DD/MM/YYYY">
+                                    {element.date}
+                                  </Moment>
+                                </TableCell>
+                                <TableCell id="media-table-type">
+                                  {displayType(element.type, props.language)}
+                                </TableCell>
+                              </>
+                            )}
                             <TableCell id="media-table-link">
                               {element.type !== "youtube" ? (
                                 <Button
@@ -346,14 +359,16 @@ const Commission = (props) => {
                       </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
-                      <Typography variant="body1">
-                        {languageDisplay(
-                          commission.mediaLabels.find(
-                            ({ identifier }) => identifier === "mediaContact"
-                          ),
-                          props.language
-                        )}
-                      </Typography>
+                      {isMobile ? null : (
+                        <Typography variant="body1">
+                          {languageDisplay(
+                            commission.mediaLabels.find(
+                              ({ identifier }) => identifier === "mediaContact"
+                            ),
+                            props.language
+                          )}
+                        </Typography>
+                      )}
                       <Typography
                         variant="subtitle2"
                         className={classes.mediaMail}
