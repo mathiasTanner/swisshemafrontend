@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 
 import { Link } from "@reach/router";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useMediaQuery } from "@material-ui/core";
 
 import ReactMarkdown from "react-markdown";
 import Typography from "@material-ui/core/Typography";
@@ -23,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
   subheader: {
     color: `${theme.palette.primary.dark} `,
     margin: "20px",
+    [theme.breakpoints.down("xs")]: {
+      margin: "0px",
+    },
   },
   expansion: {
     width: "60vw",
@@ -30,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
     padding: "15px",
     backgroundColor: `${theme.palette.primary.dark} `,
     color: `${theme.palette.secondary.light} `,
+    [theme.breakpoints.down("xs")]: {
+      width: "90vw",
+      margin: "0px",
+      padding: "0px",
+    },
   },
   heading: {
     textAlign: "center",
@@ -56,6 +65,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 const Publications = (props) => {
   const classes = useStyles();
+  const isMobile = useMediaQuery(useTheme().breakpoints.down("xs"));
 
   const [expanded, setExpanded] = useState(false);
 
@@ -85,7 +95,7 @@ const Publications = (props) => {
                 {languageDisplay(publication.title, props.language)}
               </Typography>
             </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
+            <ExpansionPanelDetails class="expansion-detail">
               <Grid
                 container
                 direction="column"
@@ -118,6 +128,7 @@ const Publications = (props) => {
             ).length > 0 ? (
               <ExpansionPanelActions>
                 <Button
+                  size={isMobile ? "small" : "medium"}
                   component={Link}
                   to={"/" + publication.event.pagename}
                   variant="contained"
