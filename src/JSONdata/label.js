@@ -93,3 +93,11 @@ export const uploadLabel = {
   IT: "Fai clic o trascina qui il documento",
   RO: "Upload",
 };
+
+export const mailErrorMsg = {
+  EN: "Please enter correct email",
+  FR: "Veuillez entrer un mail correct",
+  DE: "Bitte geben Sie ein korrektes email ein",
+  IT: "Si prega di inserire l'e-mail corretta",
+  RO: "Please enter correct email",
+};

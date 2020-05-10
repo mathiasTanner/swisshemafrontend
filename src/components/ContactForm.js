@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
+import axios from "axios";
 
 import { useMediaQuery } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -15,10 +16,17 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
-import emailjs from "emailjs-com";
+import JoditEditor from "jodit-react";
 
 import languageDisplay from "../functions/languageDisplay";
-import { mailSent, mandatory, send, closeLabel } from "../JSONdata/label";
+
+import {
+  mailSent,
+  mandatory,
+  send,
+  closeLabel,
+  mailErrorMsg,
+} from "../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
   question: {
@@ -44,20 +52,13 @@ const Form = (props) => {
   const classes = useStyles();
   const [disabled, setDisabled] = useState(true);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
-  const [validator, setValidator] = useState({
-    mail: {
-      complete: false,
-      wrongInput: false,
-    },
-    text: {
-      complete: false,
-      wrongInput: true,
-    },
-    long_text: {
-      complete: false,
-      wrongInput: true,
-    },
-  });
+  const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
+  const [dynamicValidator, setDynamicValidator] = useState(null);
+
+  const editor = useRef(null);
+  const config = {
+    readonly: false,
+  };
 
   const handleClose = () => {
     props.close();
@@ -68,7 +69,28 @@ const Form = (props) => {
     if (!props.form.questions[0].hasOwnProperty("answer")) {
       props.form.questions.map((q) => (q["answer"] = ""));
     }
-  }, [props.form.questions]);
+    if (dynamicValidator === null) {
+      let generated = {};
+      for (const q of props.form.questions) {
+        switch (q.type) {
+          case "email":
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: true },
+            };
+            break;
+
+          default:
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+        }
+      }
+      setDynamicValidator(generated);
+    }
+  }, [props.form.questions, dynamicValidator]);
 
   const submitForm = () => {
     if (props.form.type === "contact") {
@@ -87,40 +109,30 @@ const Form = (props) => {
         return null;
       });
 
-      var template_params = {
-        from_mail: email,
-        mail_subject: subject,
-        content_text: text,
-      };
+      //TODO: make error message and show qustionnary if error
 
-      var service_id = "default_service";
-      var template_id = "contact_form";
-      let user_id = "user_2VENXOXhX0s1pWnHfkTfh";
-      emailjs.send(service_id, template_id, template_params, user_id).then(
-        (result) => {
-          setCOnfirmationVisible(true);
-        },
-        (error) => {
-          console.log(error.text);
-        }
-      );
-
-      // const requestOptions = {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     to: "swiss.federation.hema@gmail.com",
-      //     from: email,
-      //     replyTo: email,
-      //     cc: "mathias.tanner.ge@gmail.com, ",
-      //     subject: subject,
-      //     text: text,
-      //   }),
-      // };
-
-      // fetch("https://admin.tannerdev.tech/email", requestOptions)
-      //   .then((response) => response.json())
-      //   .then((data) => setCOnfirmationVisible(true));
+      axios
+        .post(
+          `https://admin.tannerdev.tech/email`,
+          {
+            to: "contact@tannerdev.tech",
+            from: email,
+            replyTo: email,
+            cc: "mathias.tanner.ge@gmail.com",
+            subject: subject,
+            text: text,
+            html: text,
+          },
+          { headers: { "Content-Type": "application/json" } }
+        )
+        .then(
+          (response) => {
+            setCOnfirmationVisible(true);
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
     }
   };
 
@@ -132,26 +144,29 @@ const Form = (props) => {
           testedMail.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{1,})$/i) &&
           question.answer !== ""
         ) {
-          setValidator({
-            ...validator,
-            mail: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         } else {
           if (testedMail === "" && question.mandatory) {
-            setValidator({
-              ...validator,
-              mail: { wrongInput: false, complete: false },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: false },
             });
+            setMailErrorMsgVisible(false);
           } else if (testedMail === "" && !question.mandatory) {
-            setValidator({
-              ...validator,
-              mail: { wrongInput: false, complete: true },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: true, wrongInput: false },
             });
+            setMailErrorMsgVisible(false);
           } else {
-            setValidator({
-              ...validator,
-              mail: { complete: true, wrongInput: true },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: true, wrongInput: true },
             });
+            setMailErrorMsgVisible(true);
           }
         }
 
@@ -159,28 +174,28 @@ const Form = (props) => {
 
       case "text":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
 
       case "long_text":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            long_text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            long_text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
@@ -189,19 +204,19 @@ const Form = (props) => {
         break;
     }
 
-    if (
-      validator.text.complete &&
-      validator.mail.complete &&
-      validator.long_text.complete
-    ) {
-      if (
-        validator.text.wrongInput ||
-        validator.mail.wrongInput ||
-        validator.long_text.wrongInput
-      ) {
-        setDisabled(true);
-      } else {
+    let nbrCorrect = 0;
+    let nbrComplete = 0;
+
+    for (const q of props.form.questions) {
+      if (dynamicValidator[q.name].complete) nbrComplete++;
+      if (!dynamicValidator[q.name].wrongInput) nbrCorrect++;
+    }
+
+    if (props.form.questions.length === nbrCorrect) {
+      if (props.form.questions.length === nbrComplete) {
         setDisabled(false);
+      } else {
+        setDisabled(true);
       }
     } else {
       setDisabled(true);
@@ -234,22 +249,16 @@ const Form = (props) => {
       case "long_text":
         return (
           <div>
-            <TextField
-              id="long_text"
-              defaultValue=""
-              label={languageDisplay(question, props.language)}
-              required={question.mandatory}
-              multiline
-              rows="6"
-              onChange={(event) => {
-                question.answer = event.target.value;
+            <JoditEditor
+              ref={editor}
+              value={question.answer}
+              config={config}
+              tabIndex={1}
+              onBlur={(newContent) => {
+                question.answer = newContent;
                 fieldValidator(question);
               }}
-              onBlur={() => {
-                fieldValidator(question);
-              }}
-              variant="outlined"
-              fullWidth
+              onChange={(newContent) => {}}
             />
           </div>
         );
@@ -259,7 +268,7 @@ const Form = (props) => {
           <div>
             <TextField
               id="email"
-              error={validator.mail.wrongInput}
+              error={mailErrorMsgVisible}
               defaultValue=""
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
@@ -272,12 +281,8 @@ const Form = (props) => {
               }}
               variant="outlined"
               helperText={
-                validator.mail.wrongInput
-                  ? props.language === "FR"
-                    ? "veuillez entrer un mail correct"
-                    : props.language === "EN"
-                    ? "please enter correct email"
-                    : "Bitte geben Sie ein korrektes email ein"
+                mailErrorMsgVisible
+                  ? languageDisplay(mailErrorMsg, props.language)
                   : null
               }
               fullWidth

@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 
+//query Form($id: ID!)
 const FORM_QUERY = gql`
   query Form($id: ID!) {
     form(id: $id) {
@@ -10,8 +11,12 @@ const FORM_QUERY = gql`
         DE
         EN
       }
-      questions(sort: "name") {
+      questions(sort: "number") {
         name
+        number
+        form {
+          name
+        }
         type
         mandatory
         EN
@@ -23,6 +28,10 @@ const FORM_QUERY = gql`
           DE
           value
         }
+        min_date
+        max_date
+        min_time
+        max_time
       }
     }
   }
