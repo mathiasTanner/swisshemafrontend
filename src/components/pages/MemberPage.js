@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     margin: "15px",
     padding: "15px",
+    minHeight: "80vh",
     [theme.breakpoints.down("xs")]: {
       margin: "0px",
     },

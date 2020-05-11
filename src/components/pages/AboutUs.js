@@ -39,9 +39,9 @@ const useStyles = makeStyles((theme) => ({
     minWidth: "98.5vw",
   },
   contentPaper: {
-    backgroundColor: `${theme.palette.secondary.light} `,
     margin: "10px",
     padding: "15px",
+    minHeight: "80vh",
     [theme.breakpoints.down("xs")]: {
       paddingTop: "35px",
       margin: "0px",
@@ -264,6 +264,8 @@ const AboutUs = (props) => {
                   <Query query={PUBLICATIONS_QUERY}>
                     {({ data: { publications } }) => {
                       props.storePublications(publications);
+                      console.log(publications);
+
                       return <Publications publications={publications} />;
                     }}
                   </Query>
