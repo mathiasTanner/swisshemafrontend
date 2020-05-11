@@ -1,8 +1,10 @@
 import React from "react";
 import Query from "./Query";
 import COMMISSION_BY_NAME_QUERY from "../queries/commissions/commissionByName";
+//import FORM_QUERY from "../queries/forms/form";
 
 import Publications from "./Publications";
+//import Forms from "./Forms";
 
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
@@ -108,7 +110,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 //TODO: have video be embedded
-//TODO: filter media list by type
+//TODO: filter media list
+//TODO: replace contact mail by form
 
 const Commission = (props) => {
   const classes = useStyles();

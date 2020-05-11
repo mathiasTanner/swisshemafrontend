@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
+import axios from "axios";
 
 import { useMediaQuery } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -13,11 +14,11 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import JoditEditor from "jodit-react";
 
 import languageDisplay from "../functions/languageDisplay";
 import { mailSent, mandatory, send, uploadLabel } from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
-import emailjs from "emailjs-com";
 
 //TODO: make file upload via either graphql or axios
 //TODO: Finish switches for all form question type
@@ -45,6 +46,9 @@ const useStyles = makeStyles((theme) => ({
     },
     margin: "5px",
   },
+  input: {
+    display: "none",
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -59,22 +63,16 @@ const Forms = (props) => {
   const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
   const classes = useStyles();
   const [disabled, setDisabled] = useState(true);
+  const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
-  const [validator, setValidator] = useState({
-    mail: {
-      complete: false,
-      wrongInput: false,
-    },
-    text: {
-      complete: false,
-      wrongInput: true,
-    },
-    long_text: {
-      complete: false,
-      wrongInput: true,
-    },
-  });
+  const [dynamicValidator, setDynamicValidator] = useState(null);
 
+  const editor = useRef(null);
+  const config = {
+    readonly: false,
+  };
+
+  // TODO: Make the questionnary clear and send
   const handleClose = () => {
     props.close();
     setCOnfirmationVisible(false);
@@ -84,15 +82,35 @@ const Forms = (props) => {
     if (!props.form.questions[0].hasOwnProperty("answer")) {
       props.form.questions.map((q) => (q["answer"] = ""));
     }
-  }, [props.form.questions]);
+    if (dynamicValidator === null) {
+      let generated = {};
+      for (const q of props.form.questions) {
+        switch (q.type) {
+          case "email":
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: true },
+            };
+            break;
+
+          default:
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+        }
+      }
+      setDynamicValidator(generated);
+    }
+  }, [props.form.questions, dynamicValidator]);
 
   const submitForm = () => {
     if (props.form.type === "contact") {
       let email;
       let subject;
-      let text;
-      let textTable = [];
-      let attachment = null;
+      let text = "";
+      let attachments = null;
       if (props.form.name === "Contact Form") {
         props.form.questions.map((question) => {
           if (question.type === "email") {
@@ -107,38 +125,47 @@ const Forms = (props) => {
         for (const question of props.form.questions) {
           if (question.type === "email") {
             email = question.answer;
-          } else if (question.name.includes("author")) {
             subject = "Media sharing by " + question.answer;
           } else if (question.type === "upload") {
-            attachment = question.answer;
+            attachments = question.answer;
           } else {
-            text = text + question.name + ": " + question.answer + "\n\r";
-            textTable.push(question.name + ": " + question.answer);
+            text =
+              text + "<p>" + question.name + ": " + question.answer + "</p>";
           }
         }
       }
 
-      textTable.map((item) => console.log(item));
+      //TODO: ATTACHMENT DOESN?T WORK WITHOUT GOING THROUGH THE NODE SERVER
+      //TODO: make error message and show qustionnary if error
 
-      let template_params = {
-        from_mail: email,
-        reply_to: email,
-        message_html: textTable.map((item) => <p>{JSON.stringify(item)}</p>),
-      };
-
-      //ATTACHMENT DOESN'T WIORK; CORRECT THIS
-
-      let service_id = "default_service";
-      let template_id = "media_submission";
-      let user_id = "user_2VENXOXhX0s1pWnHfkTfh";
-      emailjs.send(service_id, template_id, template_params, user_id).then(
-        (result) => {
-          console.log(result.text);
-        },
-        (error) => {
-          console.log(error.text);
-        }
-      );
+      axios
+        .post(
+          `https://admin.tannerdev.tech/email`,
+          {
+            to: "contact@tannerdev.tech",
+            from: email,
+            replyTo: email,
+            cc: "mathias.tanner.ge@gmail.com",
+            subject: subject,
+            text: text,
+            html: text,
+            // attachments: [
+            //   {
+            //     ...attachments[0],
+            //     contentType: attachments[0].type,
+            //   },
+            // ],
+          },
+          { headers: { "Content-Type": "application/json" } }
+        )
+        .then(
+          (response) => {
+            setCOnfirmationVisible(true);
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
     }
   };
 
@@ -150,26 +177,29 @@ const Forms = (props) => {
           testedMail.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{1,})$/i) &&
           question.answer !== ""
         ) {
-          setValidator({
-            ...validator,
-            mail: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         } else {
           if (testedMail === "" && question.mandatory) {
-            setValidator({
-              ...validator,
-              mail: { wrongInput: false, complete: false },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: false },
             });
+            setMailErrorMsgVisible(false);
           } else if (testedMail === "" && !question.mandatory) {
-            setValidator({
-              ...validator,
-              mail: { wrongInput: false, complete: true },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: true },
             });
+            setMailErrorMsgVisible(false);
           } else {
-            setValidator({
-              ...validator,
-              mail: { complete: true, wrongInput: true },
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: true, wrongInput: true },
             });
+            setMailErrorMsgVisible(true);
           }
         }
 
@@ -177,56 +207,56 @@ const Forms = (props) => {
 
       case "text":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
 
       case "long_text":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            long_text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            long_text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
 
       case "select":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            long_text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            long_text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
 
       case "upload":
         if (question.answer === "" && question.mandatory) {
-          setValidator({
-            ...validator,
-            long_text: { complete: false, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
           });
         } else {
-          setValidator({
-            ...validator,
-            long_text: { complete: true, wrongInput: false },
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
           });
         }
         break;
@@ -235,19 +265,19 @@ const Forms = (props) => {
         break;
     }
 
-    if (
-      validator.text.complete &&
-      validator.mail.complete &&
-      validator.long_text.complete
-    ) {
-      if (
-        validator.text.wrongInput ||
-        validator.mail.wrongInput ||
-        validator.long_text.wrongInput
-      ) {
-        setDisabled(true);
-      } else {
+    let nbrCorrect = 0;
+    let nbrComplete = 0;
+
+    for (const q of props.form.questions) {
+      if (dynamicValidator[q.name].complete) nbrComplete++;
+      if (!dynamicValidator[q.name].wrongInput) nbrCorrect++;
+    }
+
+    if (props.form.questions.length === nbrCorrect) {
+      if (props.form.questions.length === nbrComplete) {
         setDisabled(false);
+      } else {
+        setDisabled(true);
       }
     } else {
       setDisabled(true);
@@ -280,22 +310,17 @@ const Forms = (props) => {
       case "long_text":
         return (
           <div>
-            <TextField
-              id="long_text"
-              defaultValue=""
-              label={languageDisplay(question, props.language)}
-              required={question.mandatory}
-              multiline
-              rows="6"
-              onChange={(event) => {
-                question.answer = event.target.value;
+            <JoditEditor
+              id={"long_text" + i}
+              ref={editor}
+              value={question.answer}
+              config={config}
+              tabIndex={1}
+              onBlur={(newContent) => {
+                question.answer = newContent;
                 fieldValidator(question);
               }}
-              onBlur={() => {
-                fieldValidator(question);
-              }}
-              variant="outlined"
-              fullWidth
+              onChange={(newContent) => {}}
             />
           </div>
         );
@@ -304,8 +329,9 @@ const Forms = (props) => {
         return (
           <div>
             <TextField
-              id="email"
-              error={validator.mail.wrongInput}
+              id={"email" + i}
+              type="email"
+              error={mailErrorMsgVisible}
               defaultValue=""
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
@@ -318,7 +344,7 @@ const Forms = (props) => {
               }}
               variant="outlined"
               helperText={
-                validator.mail.wrongInput
+                mailErrorMsgVisible
                   ? props.language === "FR"
                     ? "veuillez entrer un mail correct"
                     : props.language === "EN"
@@ -335,13 +361,13 @@ const Forms = (props) => {
         return (
           <div>
             <FormControl variant="outlined" className={classes.selectQuestion}>
-              <InputLabel id="select-label">
+              <InputLabel id={"select-label" + i}>
                 {languageDisplay(question, props.language)}
                 {question.mandatory ? "*" : null}
               </InputLabel>
               <Select
-                labelId="select-label"
-                id="select-outlined"
+                labelId={"select-label" + i}
+                id={"select-outlined" + i}
                 value={question.answer || question.options[0].value}
                 onChange={(event) => {
                   question.answer = event.target.value;
@@ -370,6 +396,7 @@ const Forms = (props) => {
         return (
           <div>
             <DropzoneArea
+              id={"dropzone" + i}
               onChange={(files) => {
                 question.answer = files;
                 fieldValidator(question);
@@ -380,6 +407,21 @@ const Forms = (props) => {
               }
               filesLimit={1}
             />
+            {/* <input
+              className={classes.input}
+              id="contained-button-file"
+              type="file"
+              onChange={(event) => {
+                question.answer = event.target.files;
+                fieldValidator(question);
+                //console.log(event.target.files);
+              }}
+            />
+            <label htmlFor="contained-button-file">
+              <Button variant="contained" color="primary" component="span">
+                Upload
+              </Button>
+            </label> */}
           </div>
         );
       default:

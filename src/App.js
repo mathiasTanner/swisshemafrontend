@@ -17,7 +17,7 @@ import Store from "./Store";
 import { Router } from "@reach/router";
 import AboutUs from "./components/pages/AboutUs.js";
 import MemberPage from "./components/pages/MemberPage.js";
-import Events from "./components/pages/events/Events.js";
+import EventPage from "./components/pages/events/EventPage.js";
 import Evenment from "./components/pages/events/Evenment.js";
 import International from "./components/pages/International";
 import CommissionsPage from "./components/pages/CommissionsPage";
@@ -67,7 +67,7 @@ function App() {
               <Router>
                 <AboutUs path="/aboutus" />
                 <MemberPage path="/members" />
-                <Events path="/events" />
+                <EventPage path="/events" />
                 <Evenment path="/swissgathering" name="Swiss Gathring" />
                 <Evenment path="/bearcup" name="Bear Cup" />
                 <Evenment path="/instructorcamp" name="Intructor Boot Camp" />

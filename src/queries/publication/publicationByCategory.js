@@ -4,6 +4,9 @@ const PUBLICATIONS_BY_CATEGORY_QUERY = gql`
   query Category($name: String!) {
     categories(where: { name: $name }) {
       publications {
+        categories {
+          name
+        }
         title {
           FR
           DE

@@ -55,7 +55,6 @@ const MobileCommissionDisplay = (props) => {
 
   const handleClick = (name) => {
     setCommissionDisplayed(name);
-    console.log(commissionDisplayed);
   };
 
   return (

@@ -23,12 +23,13 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 
 import languageDisplay from "../../functions/languageDisplay";
-import Query from "../PageQuery";
+import Query from "../Query";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "15px",
     padding: "15px",
+    minHeight: "80vh",
     [theme.breakpoints.down("xs")]: {
       margin: "0px",
       marginBottom: "15px",
@@ -71,17 +72,6 @@ const useStyles = makeStyles((theme) => ({
       margin: "0px",
       maxWidth: "100vw",
     },
-  },
-  button: {
-    backgroundColor: `${theme.palette.secondary.light} `,
-    color: `${theme.palette.primary.dark} `,
-    borderColor: `${theme.palette.primary.dark} `,
-    "&:hover": {
-      backgroundColor: `${theme.palette.primary.dark} `,
-      color: `${theme.palette.secondary.light} `,
-      borderColor: `${theme.palette.secondary.light} `,
-    },
-    margin: "1vw",
   },
 }));
 

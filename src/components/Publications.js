@@ -40,6 +40,12 @@ const useStyles = makeStyles((theme) => ({
       padding: "0px",
     },
   },
+  expansionDetail: {
+    [theme.breakpoints.down("xs")]: {
+      margin: "0px",
+      padding: "0px",
+    },
+  },
   heading: {
     textAlign: "center",
     margin: "auto",
@@ -95,7 +101,10 @@ const Publications = (props) => {
                 {languageDisplay(publication.title, props.language)}
               </Typography>
             </ExpansionPanelSummary>
-            <ExpansionPanelDetails class="expansion-detail">
+            <ExpansionPanelDetails
+              id={"expansion-detail-" + i}
+              className={classes.expansionDetail}
+            >
               <Grid
                 container
                 direction="column"
