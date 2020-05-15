@@ -21,7 +21,7 @@ import EventPage from "./components/pages/events/EventPage.js";
 import Evenment from "./components/pages/events/Evenment.js";
 import International from "./components/pages/International";
 import CommissionsPage from "./components/pages/CommissionsPage";
-import Calendar from "./components/pages/events/Calendar.js";
+import ClaendarContainer from "./components/pages/events/CalendarContainer.js";
 
 const useStyles = makeStyles((theme) => ({
   App: {
@@ -71,7 +71,7 @@ function App() {
                 <Evenment path="/swissgathering" name="Swiss Gathring" />
                 <Evenment path="/bearcup" name="Bear Cup" />
                 <Evenment path="/instructorcamp" name="Intructor Boot Camp" />
-                <Calendar path="/calendar" />
+                <ClaendarContainer path="/calendar" />
                 <International path="/international" />
                 <CommissionsPage path="/commissions" />
                 <AboutUs path="/" />

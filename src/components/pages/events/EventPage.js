@@ -150,22 +150,32 @@ const EventPage = (props) => {
                       props.language
                     )}
                   </Typography>
-                  {eventPage.labels.map((label, i) => {
-                    return label.identifier === "calendar" ||
-                      label.identifier === "federationEventsTitle" ? null : (
-                      <Button
-                        key={i}
-                        variant="outlined"
-                        component={Link}
-                        to={"/" + label.identifier}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={classes.button}
-                      >
-                        {languageDisplay(label, props.language)}
-                      </Button>
-                    );
-                  })}
+                  <Grid
+                    container
+                    direction="row"
+                    justify="space-between"
+                    alignItems="center"
+                    id="button-grid-container"
+                  >
+                    {eventPage.labels.map((label, i) => {
+                      return label.identifier === "calendar" ||
+                        label.identifier === "federationEventsTitle" ? null : (
+                        <Grid item id={"button-grid" + i} key={i}>
+                          <Button
+                            key={i}
+                            variant="outlined"
+                            component={Link}
+                            to={"/" + label.identifier}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={classes.button}
+                          >
+                            {languageDisplay(label, props.language)}
+                          </Button>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
                 </Grid>
                 <Grid
                   item
@@ -174,8 +184,6 @@ const EventPage = (props) => {
                 >
                   <Query query={PUBLICATIONS_BY_CATEGORY_QUERY} name={"event"}>
                     {({ data: { categories } }) => {
-                      console.log(categories[0].publications);
-
                       return (
                         <Publications
                           publications={categories[0].publications}

@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
 
-import { useMediaQuery } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+//import { useMediaQuery } from "@material-ui/core";
+import { makeStyles /*, useTheme*/ } from "@material-ui/core/styles";
 
-import { Typography } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { FormHelperText } from "@material-ui/core";
@@ -15,9 +14,19 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import JoditEditor from "jodit-react";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
 
 import languageDisplay from "../functions/languageDisplay";
-import { mailSent, mandatory, send, uploadLabel } from "../JSONdata/label";
+import {
+  mailSent,
+  mandatory,
+  send,
+  uploadLabel,
+  closeLabel,
+} from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
 
 //TODO: make file upload via either graphql or axios
@@ -25,8 +34,10 @@ import { DropzoneArea } from "material-ui-dropzone";
 
 const useStyles = makeStyles((theme) => ({
   question: {
-    margin: "15px",
     width: "75%",
+    margin: "auto",
+    marginTop: "15px",
+    marginBottom: "15px",
   },
   selectQuestion: {
     width: "30%",
@@ -60,22 +71,33 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 const Forms = (props) => {
-  const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
+  //const isMobile = useMediaQuery(useTheme().breakpoints.down("sm"));
   const classes = useStyles();
   const [disabled, setDisabled] = useState(true);
   const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
+
   const [dynamicValidator, setDynamicValidator] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const editor = useRef(null);
   const config = {
     readonly: false,
   };
 
-  // TODO: Make the questionnary clear and send
   const handleClose = () => {
-    props.close();
-    setCOnfirmationVisible(false);
+    if (confirmationVisible) {
+      clearQuestionnary();
+      setOpen(false);
+    }
+  };
+  const handleOpen = (success) => {
+    setCOnfirmationVisible(success);
+    setOpen(success);
+  };
+
+  const clearQuestionnary = () => {
+    props.form.questions.map((q) => (q["answer"] = ""));
   };
 
   useEffect(() => {
@@ -110,9 +132,9 @@ const Forms = (props) => {
       let email;
       let subject;
       let text = "";
-      let attachments = null;
+      //let attachments = null;
       if (props.form.name === "Contact Form") {
-        props.form.questions.map((question) => {
+        for (const question of props.form.questions) {
           if (question.type === "email") {
             email = question.answer;
           } else if (question.type === "text") {
@@ -120,14 +142,12 @@ const Forms = (props) => {
           } else {
             text = question.answer;
           }
-        });
-      } else if (props.form.name === "Media Form") {
+        }
+      } else {
         for (const question of props.form.questions) {
           if (question.type === "email") {
             email = question.answer;
-            subject = "Media sharing by " + question.answer;
-          } else if (question.type === "upload") {
-            attachments = question.answer;
+            subject = props.form.name + ": by " + question.answer;
           } else {
             text =
               text + "<p>" + question.name + ": " + question.answer + "</p>";
@@ -160,10 +180,10 @@ const Forms = (props) => {
         )
         .then(
           (response) => {
-            setCOnfirmationVisible(true);
+            handleOpen(true);
           },
           (error) => {
-            console.log(error);
+            handleOpen(false);
           }
         );
     }
@@ -291,7 +311,8 @@ const Forms = (props) => {
           <div>
             <TextField
               id={"text" + i}
-              defaultValue=""
+              //defaultValue=""
+              value={question.hasOwnProperty("answer") ? question.answer : ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
@@ -313,7 +334,7 @@ const Forms = (props) => {
             <JoditEditor
               id={"long_text" + i}
               ref={editor}
-              value={question.answer}
+              value={question.hasOwnProperty("answer") ? question.answer : ""}
               config={config}
               tabIndex={1}
               onBlur={(newContent) => {
@@ -332,7 +353,7 @@ const Forms = (props) => {
               id={"email" + i}
               type="email"
               error={mailErrorMsgVisible}
-              defaultValue=""
+              value={question.hasOwnProperty("answer") ? question.answer : ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
@@ -407,21 +428,6 @@ const Forms = (props) => {
               }
               filesLimit={1}
             />
-            {/* <input
-              className={classes.input}
-              id="contained-button-file"
-              type="file"
-              onChange={(event) => {
-                question.answer = event.target.files;
-                fieldValidator(question);
-                //console.log(event.target.files);
-              }}
-            />
-            <label htmlFor="contained-button-file">
-              <Button variant="contained" color="primary" component="span">
-                Upload
-              </Button>
-            </label> */}
           </div>
         );
       default:
@@ -432,19 +438,13 @@ const Forms = (props) => {
   return (
     <Grid container direction="column">
       <Grid item id="questions">
-        {!confirmationVisible ? (
-          props.form.questions.map((question, i) => {
-            return (
-              <div key={i} className={classes.question}>
-                {renderInput(question, i)}
-              </div>
-            );
-          })
-        ) : (
-          <Typography variant="body1">
-            {languageDisplay(mailSent, props.language)}
-          </Typography>
-        )}
+        {props.form.questions.map((question, i) => {
+          return (
+            <div key={i} className={classes.question}>
+              {renderInput(question, i)}
+            </div>
+          );
+        })}
       </Grid>
       <Grid item id="button-area">
         <Grid container direction="row" justify="flex-end">
@@ -453,21 +453,37 @@ const Forms = (props) => {
               * {languageDisplay(mandatory, props.language)}
             </FormHelperText>
           ) : null}
-          {!confirmationVisible ? (
-            <div>
-              <Button
-                color="primary"
-                variant="contained"
-                disabled={disabled}
-                onClick={submitForm}
-                className={classes.button}
-              >
-                {languageDisplay(send, props.language)}
-              </Button>
-            </div>
-          ) : null}
+
+          <Button
+            color="primary"
+            variant="contained"
+            disabled={disabled}
+            onClick={submitForm}
+            className={classes.button}
+          >
+            {languageDisplay(send, props.language)}
+          </Button>
         </Grid>
       </Grid>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {confirmationVisible
+              ? languageDisplay(mailSent, props.language)
+              : null}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            {languageDisplay(closeLabel, props.language)}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
