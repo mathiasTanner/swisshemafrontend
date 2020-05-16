@@ -176,19 +176,18 @@ const Calendar = (props) => {
         field: "calendar",
         searchable: false,
         sorting: false,
-        render: (rowData) =>
-          isMobile ? null : (
-            <AddToCalendar
-              event={{
-                name: rowData.name,
-                details: languageDisplay(rowData.details, props.language).props
-                  .children,
-                location: rowData.location,
-                startsAt: rowData.start,
-                endsAt: rowData.end,
-              }}
-            />
-          ),
+        render: (rowData) => (
+          <AddToCalendar
+            event={{
+              name: rowData.name,
+              details: languageDisplay(rowData.details, props.language).props
+                .children,
+              location: rowData.location,
+              startsAt: rowData.start,
+              endsAt: rowData.end,
+            }}
+          />
+        ),
       },
     ],
     FR: [

@@ -101,3 +101,19 @@ export const mailErrorMsg = {
   IT: "Si prega di inserire l'e-mail corretta",
   RO: "Please enter correct email",
 };
+
+export const timeToEarly = {
+  EN: "Please enter a time later than:",
+  FR: "Veuillez entrer une heure plus tard que: ",
+  DE: "Bitte geben Sie eine Zeit später als: ",
+  IT: "Please enter a time later than:",
+  RO: "Please enter a time later than:",
+};
+
+export const timeToLate = {
+  EN: "Please enter a time earlier than:",
+  FR: "Veuillez entrer une heure plus töt que: ",
+  DE: "Bitte geben Sie eine Zeit früher als: ",
+  IT: "Please enter a time earlier than:",
+  RO: "Please enter a time earlier than:",
+};

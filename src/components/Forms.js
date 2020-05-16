@@ -18,6 +18,14 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
+import DateFnsUtils from "@date-io/date-fns";
+import Moment from "react-moment";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+  KeyboardTimePicker,
+  KeyboardDateTimePicker,
+} from "@material-ui/pickers";
 
 import languageDisplay from "../functions/languageDisplay";
 import {
@@ -26,6 +34,8 @@ import {
   send,
   uploadLabel,
   closeLabel,
+  timeToEarly,
+  timeToLate,
 } from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
 
@@ -60,6 +70,10 @@ const useStyles = makeStyles((theme) => ({
   input: {
     display: "none",
   },
+  timeError: {
+    textAlign: "center",
+    color: `${theme.palette.primary.main} `,
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -76,9 +90,13 @@ const Forms = (props) => {
   const [disabled, setDisabled] = useState(true);
   const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
+  const [timeToEarlyVisible, setTimeToEarlyVisible] = useState(false);
+  const [timeToLateVisible, setTimeToLateVisible] = useState(false);
 
   const [dynamicValidator, setDynamicValidator] = useState(null);
   const [open, setOpen] = useState(false);
+
+  const [dates, setDates] = useState({});
 
   const editor = useRef(null);
   const config = {
@@ -106,6 +124,7 @@ const Forms = (props) => {
     }
     if (dynamicValidator === null) {
       let generated = {};
+      let myDates = {};
       for (const q of props.form.questions) {
         switch (q.type) {
           case "email":
@@ -114,7 +133,16 @@ const Forms = (props) => {
               [q.name]: { complete: !q.mandatory, wrongInput: true },
             };
             break;
-
+          case "date_time":
+            myDates = {
+              ...myDates,
+              [q.name]: new Date(),
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
           default:
             generated = {
               ...generated,
@@ -124,8 +152,9 @@ const Forms = (props) => {
         }
       }
       setDynamicValidator(generated);
+      setDates(myDates);
     }
-  }, [props.form.questions, dynamicValidator]);
+  }, [props.form.questions, dynamicValidator, dates]);
 
   const submitForm = () => {
     if (props.form.type === "contact") {
@@ -281,6 +310,98 @@ const Forms = (props) => {
         }
         break;
 
+      case "date_time":
+        let minDateTime = null;
+        let maxDateTime = null;
+        if (question.min_date !== null && question.min_time !== null) {
+          minDateTime = new Date(
+            JSON.stringify(question.min_date) +
+              JSON.stringify(question.min_time)
+          );
+        }
+        if (question.min_date !== null && question.min_time === null) {
+          minDateTime = new Date(JSON.stringify(question.min_date));
+        }
+        if (question.max_date !== null && question.max_time !== null) {
+          maxDateTime = new Date(
+            JSON.stringify(question.max_date) +
+              JSON.stringify(question.max_time)
+          );
+        }
+        if (question.max_date !== null && question.max_time === null) {
+          maxDateTime = new Date(JSON.stringify(question.max_date));
+        }
+        if (question.answer === "" && question.mandatory) {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
+          });
+        } else {
+          if (question.answer < minDateTime) {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: true },
+            });
+            setTimeToLateVisible(false);
+            setTimeToEarlyVisible(true);
+          } else if (question.answer > maxDateTime) {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: true },
+            });
+            setTimeToEarlyVisible(false);
+            setTimeToLateVisible(true);
+          } else {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: true, wrongInput: false },
+            });
+            setTimeToEarlyVisible(false);
+            setTimeToLateVisible(false);
+          }
+        }
+        break;
+      case "time":
+        let minTime = null;
+        let maxTime = null;
+
+        if (question.min_time !== null) {
+          minTime = new Date(JSON.stringify(question.min_time));
+        }
+
+        if (question.max_time !== null) {
+          maxTime = new Date(JSON.stringify(question.max_time));
+        }
+        if (question.answer === "" && question.mandatory) {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
+          });
+        } else {
+          if (question.answer < minTime) {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: true },
+            });
+            setTimeToLateVisible(false);
+            setTimeToEarlyVisible(true);
+          } else if (question.answer > maxTime) {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: false, wrongInput: true },
+            });
+            setTimeToEarlyVisible(false);
+            setTimeToLateVisible(true);
+          } else {
+            setDynamicValidator({
+              ...dynamicValidator,
+              [question.name]: { complete: true, wrongInput: false },
+            });
+            setTimeToEarlyVisible(false);
+            setTimeToLateVisible(false);
+          }
+        }
+        break;
       default:
         break;
     }
@@ -430,6 +551,161 @@ const Forms = (props) => {
             />
           </div>
         );
+
+      case "date_time":
+        let minDateTime = null;
+        let maxDateTime = null;
+        if (question.min_date !== null && question.min_time !== null) {
+          minDateTime = new Date(
+            JSON.stringify(question.min_date) +
+              JSON.stringify(question.min_time)
+          );
+        }
+        if (question.min_date !== null && question.min_time === null) {
+          minDateTime = new Date(JSON.stringify(question.min_date));
+        }
+        if (question.max_date !== null && question.max_time !== null) {
+          maxDateTime = new Date(
+            JSON.stringify(question.max_date) +
+              JSON.stringify(question.max_time)
+          );
+        }
+        if (question.max_date !== null && question.max_time === null) {
+          maxDateTime = new Date(JSON.stringify(question.max_date));
+        }
+
+        return (
+          <>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <KeyboardDateTimePicker
+                id={"datetimepicker" + i}
+                inputVariant="outlined"
+                ampm={false}
+                format="dd/MM/yyyy HH:mm"
+                value={
+                  question.answer === "" || !question.hasOwnProperty("answer")
+                    ? null
+                    : dates[question.name]
+                }
+                onChange={(value) => {
+                  question.answer = value;
+                  setDates((prevState) => {
+                    return { ...prevState, [question.name]: value };
+                  });
+                  fieldValidator(question);
+                }}
+                emptyLabel="DD/MM/YYYY HH:MM"
+                helperText={languageDisplay(question, props.language)}
+                minDate={
+                  minDateTime !== null
+                    ? minDateTime
+                    : new Date("1900 / 01 / 01")
+                }
+                maxDate={
+                  maxDateTime !== null
+                    ? maxDateTime
+                    : new Date("2100 / 01 / 01")
+                }
+              />
+            </MuiPickersUtilsProvider>
+            {timeToEarlyVisible && question.min_time !== null ? (
+              <FormHelperText className={classes.timeError}>
+                {languageDisplay(timeToEarly, props.language)}{" "}
+                <Moment parse="HH:mm" format="HH:mm">
+                  {question.min_time}
+                </Moment>
+              </FormHelperText>
+            ) : null}
+            {timeToLateVisible && question.max_time !== null ? (
+              <FormHelperText className={classes.timeError}>
+                {languageDisplay(timeToLate, props.language)}{" "}
+                <Moment parse="HH:mm" format="HH:mm">
+                  {question.max_time}
+                </Moment>
+              </FormHelperText>
+            ) : null}
+          </>
+        );
+
+      case "date":
+        let minDate = null;
+        let maxDate = null;
+
+        if (question.min_date !== null) {
+          minDate = new Date(JSON.stringify(question.min_date));
+        }
+
+        if (question.max_date !== null) {
+          maxDate = new Date(JSON.stringify(question.max_date));
+        }
+
+        return (
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              id={"datepicker" + i}
+              inputVariant="outlined"
+              ampm={false}
+              format="dd/MM/yyyy HH:mm"
+              value={
+                question.answer === "" || !question.hasOwnProperty("answer")
+                  ? null
+                  : dates[question.name]
+              }
+              onChange={(value) => {
+                question.answer = value;
+                setDates((prevState) => {
+                  return { ...prevState, [question.name]: value };
+                });
+                fieldValidator(question);
+              }}
+              emptyLabel="DD/MM/YYYY"
+              helperText={languageDisplay(question, props.language)}
+              minDate={minDate !== null ? minDate : new Date("1900 / 01 / 01")}
+              maxDate={maxDate !== null ? maxDate : new Date("2100 / 01 / 01")}
+            />
+          </MuiPickersUtilsProvider>
+        );
+
+      case "time":
+        return (
+          <>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <KeyboardTimePicker
+                id={"datetimepicker" + i}
+                inputVariant="outlined"
+                ampm={false}
+                format="HH:mm"
+                value={
+                  question.answer === "" || !question.hasOwnProperty("answer")
+                    ? null
+                    : dates[question.name]
+                }
+                onChange={(value) => {
+                  question.answer = value;
+                  setDates((prevState) => {
+                    return { ...prevState, [question.name]: value };
+                  });
+                  fieldValidator(question);
+                }}
+                emptyLabel="hh:mm"
+                helperText={languageDisplay(question, props.language)}
+              />
+            </MuiPickersUtilsProvider>
+            {timeToEarlyVisible && question.min_time !== null ? (
+              <FormHelperText className={classes.timeError}>
+                {languageDisplay(timeToEarly, props.language)}{" "}
+                {question.min_time}
+              </FormHelperText>
+            ) : null}
+            {timeToLateVisible && question.max_time !== null ? (
+              <FormHelperText className={classes.timeError}>
+                {languageDisplay(timeToLate, props.language)}{" "}
+                {question.max_time}
+              </FormHelperText>
+            ) : null}
+          </>
+        );
+
       default:
         return null;
     }
