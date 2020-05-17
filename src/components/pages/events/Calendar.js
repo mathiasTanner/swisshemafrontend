@@ -168,7 +168,7 @@ const Calendar = (props) => {
         render: (rowData) =>
           rowData.type === "Tournament"
             ? "Tournament"
-            : rowData.type === "Workshop"
+            : rowData.type === "Workshops"
             ? "Workshop"
             : "Sparring",
       },

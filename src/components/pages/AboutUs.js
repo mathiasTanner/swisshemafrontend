@@ -264,7 +264,6 @@ const AboutUs = (props) => {
                   <Query query={PUBLICATIONS_QUERY}>
                     {({ data: { publications } }) => {
                       props.storePublications(publications);
-                      console.log(publications);
 
                       return <Publications publications={publications} />;
                     }}

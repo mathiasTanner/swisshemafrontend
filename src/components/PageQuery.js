@@ -2,12 +2,10 @@ import React from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Skeleton from "@material-ui/lab/Skeleton";
 
-const Query = ({ children, query, id }) => {
+const PageQuery = ({ children, query, id, name }) => {
   const { data, loading, error } = useQuery(query, {
-    variables: { id: id },
+    variables: { id: id, name: name },
   });
-
-  //TODO: page skeleton
 
   if (loading)
     return (
@@ -23,4 +21,4 @@ const Query = ({ children, query, id }) => {
   return children({ data });
 };
 
-export default Query;
+export default PageQuery;

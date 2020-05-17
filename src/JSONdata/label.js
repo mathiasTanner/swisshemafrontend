@@ -54,6 +54,14 @@ export const mailSent = {
   RO: "Your mail was sent successfully",
 };
 
+export const mailNotSent = {
+  FR: "Une erreur s'est produite, veuillez reessayer",
+  EN: "An error occured, please try again",
+  DE: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es noch einmal",
+  IT: "Si è verificato un errore, riprova",
+  RO: "Your mail was sent successfully",
+};
+
 export const mandatory = {
   FR: "Obligatoire",
   EN: "Mandatory",
@@ -116,4 +124,36 @@ export const timeToLate = {
   DE: "Bitte geben Sie eine Zeit früher als: ",
   IT: "Please enter a time earlier than:",
   RO: "Please enter a time earlier than:",
+};
+
+export const scheduleLabel = {
+  EN: "Schedule",
+  FR: "Horaire",
+  DE: "Zeitplan",
+  IT: "Programma",
+  RO: "Ordonnancement",
+};
+
+export const presentationsLabel = {
+  EN: "Presentations",
+  FR: "Présentations",
+  DE: "Präsentationen",
+  IT: "Presentazioni",
+  RO: "Presentrations",
+};
+
+export const registrationLabel = {
+  EN: "Register",
+  FR: "S'inscrire",
+  DE: "Registrieren",
+  IT: "Registrati",
+  RO: "Register",
+};
+
+export const priceLabel = {
+  EN: "Registration fee",
+  FR: "Prix d'inscription",
+  DE: "Registrierungsgebühr",
+  IT: "Quota di iscrizione",
+  RO: "Registration fee",
 };

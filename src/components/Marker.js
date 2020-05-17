@@ -45,6 +45,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 const Marker = (props) => {
   const classes = useStyles();
+  const url =
+    props.location !== null
+      ? process.env.REACT_APP_BACKEND_URL + props.location.logo.url
+      : "../../public/swisshemalogo512.png";
+
+  const alt = props.location !== null ? props.location.name : "logo";
 
   return (
     <HtmlTooltip
@@ -55,16 +61,12 @@ const Marker = (props) => {
       title={
         <React.Fragment>
           <Typography color="inherit" variant="caption">
-            {props.location.name}
+            {props.location !== null ? props.location.name : props.name}
           </Typography>
         </React.Fragment>
       }
     >
-      <Avatar
-        src={process.env.REACT_APP_BACKEND_URL + props.location.logo.url}
-        alt={props.location.name}
-        className={classes.avatar}
-      />
+      <Avatar src={url} alt={alt} className={classes.avatar} />
     </HtmlTooltip>
   );
 };

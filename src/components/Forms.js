@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
+import { useQuery } from "@apollo/react-hooks";
+import { useLazyQuery } from "@apollo/react-hooks";
 
 //import { useMediaQuery } from "@material-ui/core";
 import { makeStyles /*, useTheme*/ } from "@material-ui/core/styles";
@@ -26,10 +28,15 @@ import {
   KeyboardTimePicker,
   KeyboardDateTimePicker,
 } from "@material-ui/pickers";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormLabel from "@material-ui/core/FormLabel";
 
 import languageDisplay from "../functions/languageDisplay";
 import {
   mailSent,
+  mailNotSent,
   mandatory,
   send,
   uploadLabel,
@@ -39,8 +46,8 @@ import {
 } from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
 
-//TODO: make file upload via either graphql or axios
-//TODO: Finish switches for all form question type
+//TODO: make file upload via graphQL
+//TODO: do radio question
 
 const useStyles = makeStyles((theme) => ({
   question: {
@@ -74,6 +81,9 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     color: `${theme.palette.primary.main} `,
   },
+  formControl: {
+    margin: theme.spacing(3),
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -90,6 +100,7 @@ const Forms = (props) => {
   const [disabled, setDisabled] = useState(true);
   const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
+  const [mailNotSentVisible, setMailNotSentVisible] = useState(false);
   const [timeToEarlyVisible, setTimeToEarlyVisible] = useState(false);
   const [timeToLateVisible, setTimeToLateVisible] = useState(false);
 
@@ -97,6 +108,8 @@ const Forms = (props) => {
   const [open, setOpen] = useState(false);
 
   const [dates, setDates] = useState({});
+  const [radioValues, setRadioValues] = useState({});
+  const [textAnswers, setTextAnswer] = useState({});
 
   const editor = useRef(null);
   const config = {
@@ -106,16 +119,26 @@ const Forms = (props) => {
   const handleClose = () => {
     if (confirmationVisible) {
       clearQuestionnary();
-      setOpen(false);
     }
+    setOpen(false);
   };
   const handleOpen = (success) => {
     setCOnfirmationVisible(success);
+    setMailNotSentVisible(!success);
     setOpen(success);
   };
 
   const clearQuestionnary = () => {
     props.form.questions.map((q) => (q["answer"] = ""));
+    for (const q of props.form.questions) {
+      setTextAnswer((prevState) => {
+        return { ...prevState, [q.name]: "" };
+      });
+      setRadioValues((prevState) => {
+        return { ...prevState, [q.name]: null };
+      });
+    }
+    setDisabled(true);
   };
 
   useEffect(() => {
@@ -125,9 +148,15 @@ const Forms = (props) => {
     if (dynamicValidator === null) {
       let generated = {};
       let myDates = {};
+      let myRadio = {};
+      let myText = {};
       for (const q of props.form.questions) {
         switch (q.type) {
           case "email":
+            myText = {
+              ...myText,
+              [q.name]: "",
+            };
             generated = {
               ...generated,
               [q.name]: { complete: !q.mandatory, wrongInput: true },
@@ -143,7 +172,41 @@ const Forms = (props) => {
               [q.name]: { complete: !q.mandatory, wrongInput: false },
             };
             break;
+          case "date":
+            myDates = {
+              ...myDates,
+              [q.name]: new Date(),
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+          case "time":
+            myDates = {
+              ...myDates,
+              [q.name]: new Date(),
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+          case "radio":
+            myRadio = {
+              ...myRadio,
+              [q.name]: q.options[0],
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
           default:
+            myText = {
+              ...myText,
+              [q.name]: "",
+            };
             generated = {
               ...generated,
               [q.name]: { complete: !q.mandatory, wrongInput: false },
@@ -153,8 +216,10 @@ const Forms = (props) => {
       }
       setDynamicValidator(generated);
       setDates(myDates);
+      setRadioValues(myRadio);
+      setTextAnswer(myText);
     }
-  }, [props.form.questions, dynamicValidator, dates]);
+  }, [props.form.questions, dynamicValidator, dates, radioValues, textAnswers]);
 
   const submitForm = () => {
     if (props.form.type === "contact") {
@@ -185,7 +250,6 @@ const Forms = (props) => {
       }
 
       //TODO: ATTACHMENT DOESN?T WORK WITHOUT GOING THROUGH THE NODE SERVER
-      //TODO: make error message and show qustionnary if error
 
       axios
         .post(
@@ -215,6 +279,10 @@ const Forms = (props) => {
             handleOpen(false);
           }
         );
+    } else {
+      clearQuestionnary();
+
+      //props.handleClose();
     }
   };
 
@@ -402,6 +470,20 @@ const Forms = (props) => {
           }
         }
         break;
+
+      case "radio":
+        if (question.answer === "" && question.mandatory) {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
+          });
+        } else {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
+          });
+        }
+        break;
       default:
         break;
     }
@@ -432,15 +514,20 @@ const Forms = (props) => {
           <div>
             <TextField
               id={"text" + i}
-              //defaultValue=""
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                setTextAnswer((prevState) => {
+                  return { ...prevState, [question.name]: event.target.value };
+                });
                 question.answer = event.target.value;
                 fieldValidator(question);
               }}
               onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               variant="outlined"
@@ -455,11 +542,17 @@ const Forms = (props) => {
             <JoditEditor
               id={"long_text" + i}
               ref={editor}
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               config={config}
               tabIndex={1}
               onBlur={(newContent) => {
+                setTextAnswer((prevState) => {
+                  return { ...prevState, [question.name]: newContent };
+                });
                 question.answer = newContent;
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               onChange={(newContent) => {}}
@@ -474,14 +567,20 @@ const Forms = (props) => {
               id={"email" + i}
               type="email"
               error={mailErrorMsgVisible}
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                setTextAnswer((prevState) => {
+                  return { ...prevState, [question.name]: event.target.value };
+                });
                 question.answer = event.target.value;
                 fieldValidator(question);
               }}
               onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               variant="outlined"
@@ -500,6 +599,7 @@ const Forms = (props) => {
         );
 
       case "select":
+        question.answer = question.options[0].value;
         return (
           <div>
             <FormControl variant="outlined" className={classes.selectQuestion}>
@@ -516,6 +616,9 @@ const Forms = (props) => {
                   fieldValidator(question);
                 }}
                 onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
                   fieldValidator(question);
                 }}
                 label={languageDisplay(question, props.language)}
@@ -594,6 +697,12 @@ const Forms = (props) => {
                   });
                   fieldValidator(question);
                 }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
                 emptyLabel="DD/MM/YYYY HH:MM"
                 helperText={languageDisplay(question, props.language)}
                 minDate={
@@ -658,6 +767,12 @@ const Forms = (props) => {
                 });
                 fieldValidator(question);
               }}
+              onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
+                fieldValidator(question);
+              }}
               emptyLabel="DD/MM/YYYY"
               helperText={languageDisplay(question, props.language)}
               minDate={minDate !== null ? minDate : new Date("1900 / 01 / 01")}
@@ -687,6 +802,12 @@ const Forms = (props) => {
                   });
                   fieldValidator(question);
                 }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
                 emptyLabel="hh:mm"
                 helperText={languageDisplay(question, props.language)}
               />
@@ -706,10 +827,57 @@ const Forms = (props) => {
           </>
         );
 
+      case "radio":
+        question.answer = question.options[0].value;
+        return (
+          <>
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">
+                {languageDisplay(question, props.language)}
+              </FormLabel>
+              <RadioGroup
+                name={question.name}
+                value={radioValues[question.name] || null}
+                onChange={(event) => {
+                  setRadioValues((prevState) => {
+                    return {
+                      ...prevState,
+                      [question.name]: event.target.value,
+                    };
+                  });
+
+                  question.answer = event.target.value;
+                  fieldValidator(question);
+                }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
+              >
+                {question.options.map((item, i) => {
+                  return (
+                    <FormControlLabel
+                      key={i}
+                      value={item.value}
+                      control={<Radio color="primary" />}
+                      label={languageDisplay(item, props.language)}
+                      labelPlacement="start"
+                    />
+                  );
+                })}
+              </RadioGroup>
+            </FormControl>
+          </>
+        );
+
       default:
         return null;
     }
   };
+
+  console.log(props.form);
 
   return (
     <Grid container direction="column">
@@ -751,6 +919,9 @@ const Forms = (props) => {
           <DialogContentText id="alert-dialog-description">
             {confirmationVisible
               ? languageDisplay(mailSent, props.language)
+              : null}
+            {mailNotSentVisible
+              ? languageDisplay(mailNotSent, props.language)
               : null}
           </DialogContentText>
         </DialogContent>
