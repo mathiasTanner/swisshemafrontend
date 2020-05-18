@@ -32,6 +32,7 @@
     "react-markdown": "^4.3.1",
     "react-material-ui-carousel": "^1.4.3",
     "react-moment": "^0.9.7",
+    "react-paypal-button-v2": "^2.6.2",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",

@@ -156,7 +156,6 @@ const Evenement = (props) => {
     setOpen(false);
   };
 
-  console.log(props.event);
   let loc = { logo: props.event.image, name: props.event.location };
 
   return (
@@ -465,8 +464,10 @@ const Evenement = (props) => {
                   return (
                     <Forms
                       form={form}
-                      handleClose={handleClose}
+                      close={handleClose}
                       eventId={props.event.id}
+                      eventname={props.event.name}
+                      price={props.event.price}
                     />
                   );
                 }}

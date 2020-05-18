@@ -6,8 +6,10 @@ const CREATE_REGISTRATION_MUTATION = gql`
     $lastName: String!
     $club: String!
     $mail: String!
+    $eventName: String!
     $answers: [ComponentQuestionsAnswerInput]!
     $event: ID!
+    $payerInfo: ComponentPaymentsPayerInfoInput!
   ) {
     createRegistration(
       input: {
@@ -17,7 +19,9 @@ const CREATE_REGISTRATION_MUTATION = gql`
           club: $club
           email: $mail
           answers: $answers
+          eventName: $eventName
           event: $event
+          payerInfo: $payerInfo
         }
       }
     ) {

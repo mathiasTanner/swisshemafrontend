@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { connect } from "react-redux";
 import axios from "axios";
-import { useQuery } from "@apollo/react-hooks";
-import { useLazyQuery } from "@apollo/react-hooks";
 
 //import { useMediaQuery } from "@material-ui/core";
 import { makeStyles /*, useTheme*/ } from "@material-ui/core/styles";
@@ -16,7 +14,9 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import JoditEditor from "jodit-react";
+import Typography from "@material-ui/core/Typography";
 import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
@@ -32,6 +32,7 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormLabel from "@material-ui/core/FormLabel";
+import { PayPalButton } from "react-paypal-button-v2";
 
 import languageDisplay from "../functions/languageDisplay";
 import {
@@ -43,11 +44,16 @@ import {
   closeLabel,
   timeToEarly,
   timeToLate,
+  registrationSuccess,
+  registrationSuccessMsg,
 } from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
 
+import { priceLabel } from "../JSONdata/label";
+
 //TODO: make file upload via graphQL
-//TODO: do radio question
+//TODO: make better email for confirmation msg
+//TODO: handle errors in case of registration, payment and mail not sent
 
 const useStyles = makeStyles((theme) => ({
   question: {
@@ -58,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
   },
   selectQuestion: {
     width: "30%",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
   },
   description: {
     width: "80%",
@@ -84,6 +93,10 @@ const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(3),
   },
+  paymentDialog: {
+    marign: "auto",
+    textAlign: "center",
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -106,10 +119,17 @@ const Forms = (props) => {
 
   const [dynamicValidator, setDynamicValidator] = useState(null);
   const [open, setOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   const [dates, setDates] = useState({});
   const [radioValues, setRadioValues] = useState({});
   const [textAnswers, setTextAnswer] = useState({});
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [club, setClub] = useState("");
+  const [answers, setAnswers] = useState([]);
+  const [paymentConfirmationOpen, setPaymentConfirmationOpen] = useState(false);
 
   const editor = useRef(null);
   const config = {
@@ -122,6 +142,19 @@ const Forms = (props) => {
     }
     setOpen(false);
   };
+
+  const handlePaymentClose = () => {
+    setPaymentConfirmationOpen(false);
+    setPaymentOpen(false);
+  };
+
+  const handleFinalConfirmationClose = () => {
+    setPaymentConfirmationOpen(false);
+    setPaymentOpen(false);
+    clearQuestionnary();
+    props.close();
+  };
+
   const handleOpen = (success) => {
     setCOnfirmationVisible(success);
     setMailNotSentVisible(!success);
@@ -280,9 +313,23 @@ const Forms = (props) => {
           }
         );
     } else {
-      clearQuestionnary();
+      for (const q of props.form.questions) {
+        if (q.type === "email") {
+          setEmail(q.answer);
+        } else if (q.name === "First name") {
+          setFirstname(q.answer);
+        } else if (q.name === "Last name") {
+          setLastname(q.answer);
+        } else if (q.name === "Club") {
+          setClub(q.answer);
+        } else {
+          setAnswers((prevState) => {
+            return [...prevState, { question: q.name, answer: q.answer }];
+          });
+        }
+      }
 
-      //props.handleClose();
+      setPaymentOpen(true);
     }
   };
 
@@ -298,6 +345,7 @@ const Forms = (props) => {
             ...dynamicValidator,
             [question.name]: { complete: true, wrongInput: false },
           });
+          setMailErrorMsgVisible(false);
         } else {
           if (testedMail === "" && question.mandatory) {
             setDynamicValidator({
@@ -518,6 +566,7 @@ const Forms = (props) => {
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                event.persist();
                 setTextAnswer((prevState) => {
                   return { ...prevState, [question.name]: event.target.value };
                 });
@@ -571,9 +620,14 @@ const Forms = (props) => {
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                event.persist();
                 setTextAnswer((prevState) => {
-                  return { ...prevState, [question.name]: event.target.value };
+                  return {
+                    ...prevState,
+                    [question.name]: event.target.value,
+                  };
                 });
+
                 question.answer = event.target.value;
                 fieldValidator(question);
               }}
@@ -839,6 +893,7 @@ const Forms = (props) => {
                 name={question.name}
                 value={radioValues[question.name] || null}
                 onChange={(event) => {
+                  event.persist();
                   setRadioValues((prevState) => {
                     return {
                       ...prevState,
@@ -877,8 +932,6 @@ const Forms = (props) => {
     }
   };
 
-  console.log(props.form);
-
   return (
     <Grid container direction="column">
       <Grid item id="questions">
@@ -909,6 +962,7 @@ const Forms = (props) => {
           </Button>
         </Grid>
       </Grid>
+      {/*mail sent dialog*/}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -928,6 +982,122 @@ const Forms = (props) => {
         <DialogActions>
           <Button onClick={handleClose} color="primary" autoFocus>
             {languageDisplay(closeLabel, props.language)}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/*payment option dialog*/}
+      <Dialog
+        open={paymentOpen}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth
+        maxWidth="lg"
+      >
+        <DialogContent className={classes.paymentDialog}>
+          <Typography
+            variant="h6"
+            component="p"
+            className={classes.paymentLabel}
+          >
+            {languageDisplay(priceLabel, props.language).props.children +
+              ": " +
+              props.price +
+              "CHF"}
+          </Typography>
+
+          <PayPalButton
+            amount={2}
+            currency="CHF"
+            shippingPreference="NO_SHIPPING"
+            onSuccess={(details, data) => {
+              let subject =
+                "Payment Conirmation: " + firstname + " " + lastname;
+              let text =
+                "Your payment of " +
+                props.price +
+                "CHF has been confirmed, contact us in case of problems";
+
+              axios
+                .post(
+                  `https://admin.tannerdev.tech/registrations`,
+                  {
+                    firstName: firstname,
+                    lastName: lastname,
+                    club: club,
+                    email: email,
+                    answers: answers,
+                    event: props.eventId,
+                    eventName: props.eventname,
+                    payerInfo: {
+                      mail: details.payer.email_address,
+                      firstName: details.payer.name.given_name,
+                      lastName: details.payer.name.surname,
+                      payer_id: details.payer.payer_id,
+                    },
+                  },
+                  { headers: { "Content-Type": "application/json" } }
+                )
+                .then(
+                  (response) => {
+                    axios
+                      .post(
+                        `https://admin.tannerdev.tech/email`,
+                        {
+                          to: email,
+                          from: "contact@tannerdev.tech",
+                          replyTo: "contact@tannerdev.tech",
+                          cc: "mathias.tanner.ge@gmail.com",
+                          subject: subject,
+                          text: text,
+                          html: text,
+                        },
+                        { headers: { "Content-Type": "application/json" } }
+                      )
+                      .then(
+                        (response) => {
+                          setPaymentConfirmationOpen(true);
+                        },
+                        (error) => {}
+                      );
+                  },
+                  (error) => {}
+                );
+            }}
+            options={{
+              clientId:
+                "AZVrcPE2fQih5ja4qYt54OQVrd22kfMVa_ayqJlCOmhMTbzs00kcfyG0q1jdf0uts7a5FB4AHYqo35Ub",
+              currency: "CHF",
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handlePaymentClose} color="primary" autoFocus>
+            {languageDisplay(closeLabel, props.language)}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={paymentConfirmationOpen}
+        onClose={handlePaymentClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {languageDisplay(registrationSuccess, props.language)}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {languageDisplay(registrationSuccessMsg, props.language)}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleFinalConfirmationClose}
+            color="primary"
+            autoFocus
+          >
+            close
           </Button>
         </DialogActions>
       </Dialog>

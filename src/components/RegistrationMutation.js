@@ -8,19 +8,24 @@ const RegistrationMutation = ({
   id,
   firstname,
   lastname,
+  club,
   mail,
   answers,
-  eventID,
+  eventName,
+  event,
+  payerInfo,
 }) => {
   const { data, loading, error } = useQuery(query, {
     variables: {
       id: id,
-      code: code,
-      name: name,
+      email: mail,
       firstname: firstname,
       lastname: lastname,
+      club: club,
       answers: answers,
-      eventID: eventID,
+      eventName: eventName,
+      event: event,
+      payerInfo: payerInfo,
     },
   });
 

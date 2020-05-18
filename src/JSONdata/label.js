@@ -157,3 +157,24 @@ export const priceLabel = {
   IT: "Quota di iscrizione",
   RO: "Registration fee",
 };
+
+export const registrationSuccess = {
+  EN: "Registration successful",
+  FR: "Enregistrement réussi",
+  DE: "Registrierung erfolgreich",
+  IT: "registrazione effettuata con successo",
+  RO: "Registration successful",
+};
+
+export const registrationSuccessMsg = {
+  EN:
+    "You should have recieved a confirmation in your email, also check your spams. In case of problem you can contact us at: info@swisshema.ch",
+  FR:
+    "Vous devriez avoir reçu un mail de confirmation, veuillez consultez vos spams également. En cas de problème vous pouvez nous contacter à: info@swisshema.ch",
+  DE:
+    "Sie sollten eine Bestätigung in Ihrer E-Mail erhalten haben, überprüfen Sie auch Ihre Spam-Mails. Im Falle eines Problems können Sie uns unter info@swisshema.ch kontaktieren",
+  IT:
+    "Dovresti aver ricevuto una conferma nella tua e-mail, controlla anche i tuoi spam. In caso di problemi potete contattarci a: info@swisshema.ch",
+  RO:
+    "You should have recieved a confirmation in your email, also check your spams. In case of problem you can contact us at: info@swisshema.ch",
+};
