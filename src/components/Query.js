@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Skeleton from "@material-ui/lab/Skeleton";
 
-const PageQuery = ({ children, query, id, code, name }) => {
+const Query = ({ children, query, id, code, name }) => {
   const { data, loading, error } = useQuery(query, {
     variables: { id: id, code: code, name: name },
   });
@@ -13,4 +13,4 @@ const PageQuery = ({ children, query, id, code, name }) => {
   return children({ data });
 };
 
-export default PageQuery;
+export default Query;

@@ -14,7 +14,9 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import JoditEditor from "jodit-react";
+import Typography from "@material-ui/core/Typography";
 import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
@@ -26,21 +28,32 @@ import {
   KeyboardTimePicker,
   KeyboardDateTimePicker,
 } from "@material-ui/pickers";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormLabel from "@material-ui/core/FormLabel";
+import { PayPalButton } from "react-paypal-button-v2";
 
 import languageDisplay from "../functions/languageDisplay";
 import {
   mailSent,
+  mailNotSent,
   mandatory,
   send,
   uploadLabel,
   closeLabel,
   timeToEarly,
   timeToLate,
+  registrationSuccess,
+  registrationSuccessMsg,
 } from "../JSONdata/label";
 import { DropzoneArea } from "material-ui-dropzone";
 
-//TODO: make file upload via either graphql or axios
-//TODO: Finish switches for all form question type
+import { priceLabel } from "../JSONdata/label";
+
+//TODO: make file upload via graphQL
+//TODO: make better email for confirmation msg
+//TODO: handle errors in case of registration, payment and mail not sent
 
 const useStyles = makeStyles((theme) => ({
   question: {
@@ -51,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
   },
   selectQuestion: {
     width: "30%",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
   },
   description: {
     width: "80%",
@@ -74,6 +90,13 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     color: `${theme.palette.primary.main} `,
   },
+  formControl: {
+    margin: theme.spacing(3),
+  },
+  paymentDialog: {
+    marign: "auto",
+    textAlign: "center",
+  },
 }));
 
 const mapStateToProps = (state, ownProps) => {
@@ -90,13 +113,23 @@ const Forms = (props) => {
   const [disabled, setDisabled] = useState(true);
   const [mailErrorMsgVisible, setMailErrorMsgVisible] = useState(false);
   const [confirmationVisible, setCOnfirmationVisible] = useState(false);
+  const [mailNotSentVisible, setMailNotSentVisible] = useState(false);
   const [timeToEarlyVisible, setTimeToEarlyVisible] = useState(false);
   const [timeToLateVisible, setTimeToLateVisible] = useState(false);
 
   const [dynamicValidator, setDynamicValidator] = useState(null);
   const [open, setOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   const [dates, setDates] = useState({});
+  const [radioValues, setRadioValues] = useState({});
+  const [textAnswers, setTextAnswer] = useState({});
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [club, setClub] = useState("");
+  const [answers, setAnswers] = useState([]);
+  const [paymentConfirmationOpen, setPaymentConfirmationOpen] = useState(false);
 
   const editor = useRef(null);
   const config = {
@@ -106,16 +139,39 @@ const Forms = (props) => {
   const handleClose = () => {
     if (confirmationVisible) {
       clearQuestionnary();
-      setOpen(false);
     }
+    setOpen(false);
   };
+
+  const handlePaymentClose = () => {
+    setPaymentConfirmationOpen(false);
+    setPaymentOpen(false);
+  };
+
+  const handleFinalConfirmationClose = () => {
+    setPaymentConfirmationOpen(false);
+    setPaymentOpen(false);
+    clearQuestionnary();
+    props.close();
+  };
+
   const handleOpen = (success) => {
     setCOnfirmationVisible(success);
+    setMailNotSentVisible(!success);
     setOpen(success);
   };
 
   const clearQuestionnary = () => {
     props.form.questions.map((q) => (q["answer"] = ""));
+    for (const q of props.form.questions) {
+      setTextAnswer((prevState) => {
+        return { ...prevState, [q.name]: "" };
+      });
+      setRadioValues((prevState) => {
+        return { ...prevState, [q.name]: null };
+      });
+    }
+    setDisabled(true);
   };
 
   useEffect(() => {
@@ -125,9 +181,15 @@ const Forms = (props) => {
     if (dynamicValidator === null) {
       let generated = {};
       let myDates = {};
+      let myRadio = {};
+      let myText = {};
       for (const q of props.form.questions) {
         switch (q.type) {
           case "email":
+            myText = {
+              ...myText,
+              [q.name]: "",
+            };
             generated = {
               ...generated,
               [q.name]: { complete: !q.mandatory, wrongInput: true },
@@ -143,7 +205,41 @@ const Forms = (props) => {
               [q.name]: { complete: !q.mandatory, wrongInput: false },
             };
             break;
+          case "date":
+            myDates = {
+              ...myDates,
+              [q.name]: new Date(),
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+          case "time":
+            myDates = {
+              ...myDates,
+              [q.name]: new Date(),
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
+          case "radio":
+            myRadio = {
+              ...myRadio,
+              [q.name]: q.options[0],
+            };
+            generated = {
+              ...generated,
+              [q.name]: { complete: !q.mandatory, wrongInput: false },
+            };
+            break;
           default:
+            myText = {
+              ...myText,
+              [q.name]: "",
+            };
             generated = {
               ...generated,
               [q.name]: { complete: !q.mandatory, wrongInput: false },
@@ -153,8 +249,10 @@ const Forms = (props) => {
       }
       setDynamicValidator(generated);
       setDates(myDates);
+      setRadioValues(myRadio);
+      setTextAnswer(myText);
     }
-  }, [props.form.questions, dynamicValidator, dates]);
+  }, [props.form.questions, dynamicValidator, dates, radioValues, textAnswers]);
 
   const submitForm = () => {
     if (props.form.type === "contact") {
@@ -185,7 +283,6 @@ const Forms = (props) => {
       }
 
       //TODO: ATTACHMENT DOESN?T WORK WITHOUT GOING THROUGH THE NODE SERVER
-      //TODO: make error message and show qustionnary if error
 
       axios
         .post(
@@ -215,6 +312,24 @@ const Forms = (props) => {
             handleOpen(false);
           }
         );
+    } else {
+      for (const q of props.form.questions) {
+        if (q.type === "email") {
+          setEmail(q.answer);
+        } else if (q.name === "First name") {
+          setFirstname(q.answer);
+        } else if (q.name === "Last name") {
+          setLastname(q.answer);
+        } else if (q.name === "Club") {
+          setClub(q.answer);
+        } else {
+          setAnswers((prevState) => {
+            return [...prevState, { question: q.name, answer: q.answer }];
+          });
+        }
+      }
+
+      setPaymentOpen(true);
     }
   };
 
@@ -230,6 +345,7 @@ const Forms = (props) => {
             ...dynamicValidator,
             [question.name]: { complete: true, wrongInput: false },
           });
+          setMailErrorMsgVisible(false);
         } else {
           if (testedMail === "" && question.mandatory) {
             setDynamicValidator({
@@ -402,6 +518,20 @@ const Forms = (props) => {
           }
         }
         break;
+
+      case "radio":
+        if (question.answer === "" && question.mandatory) {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: false, wrongInput: false },
+          });
+        } else {
+          setDynamicValidator({
+            ...dynamicValidator,
+            [question.name]: { complete: true, wrongInput: false },
+          });
+        }
+        break;
       default:
         break;
     }
@@ -432,15 +562,21 @@ const Forms = (props) => {
           <div>
             <TextField
               id={"text" + i}
-              //defaultValue=""
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                event.persist();
+                setTextAnswer((prevState) => {
+                  return { ...prevState, [question.name]: event.target.value };
+                });
                 question.answer = event.target.value;
                 fieldValidator(question);
               }}
               onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               variant="outlined"
@@ -455,11 +591,17 @@ const Forms = (props) => {
             <JoditEditor
               id={"long_text" + i}
               ref={editor}
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               config={config}
               tabIndex={1}
               onBlur={(newContent) => {
+                setTextAnswer((prevState) => {
+                  return { ...prevState, [question.name]: newContent };
+                });
                 question.answer = newContent;
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               onChange={(newContent) => {}}
@@ -474,14 +616,25 @@ const Forms = (props) => {
               id={"email" + i}
               type="email"
               error={mailErrorMsgVisible}
-              value={question.hasOwnProperty("answer") ? question.answer : ""}
+              value={textAnswers[question.name] || ""}
               label={languageDisplay(question, props.language)}
               required={question.mandatory}
               onChange={(event) => {
+                event.persist();
+                setTextAnswer((prevState) => {
+                  return {
+                    ...prevState,
+                    [question.name]: event.target.value,
+                  };
+                });
+
                 question.answer = event.target.value;
                 fieldValidator(question);
               }}
               onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
                 fieldValidator(question);
               }}
               variant="outlined"
@@ -500,6 +653,7 @@ const Forms = (props) => {
         );
 
       case "select":
+        question.answer = question.options[0].value;
         return (
           <div>
             <FormControl variant="outlined" className={classes.selectQuestion}>
@@ -516,6 +670,9 @@ const Forms = (props) => {
                   fieldValidator(question);
                 }}
                 onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
                   fieldValidator(question);
                 }}
                 label={languageDisplay(question, props.language)}
@@ -594,6 +751,12 @@ const Forms = (props) => {
                   });
                   fieldValidator(question);
                 }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
                 emptyLabel="DD/MM/YYYY HH:MM"
                 helperText={languageDisplay(question, props.language)}
                 minDate={
@@ -658,6 +821,12 @@ const Forms = (props) => {
                 });
                 fieldValidator(question);
               }}
+              onBlur={() => {
+                fieldValidator(question);
+              }}
+              onFocus={() => {
+                fieldValidator(question);
+              }}
               emptyLabel="DD/MM/YYYY"
               helperText={languageDisplay(question, props.language)}
               minDate={minDate !== null ? minDate : new Date("1900 / 01 / 01")}
@@ -687,6 +856,12 @@ const Forms = (props) => {
                   });
                   fieldValidator(question);
                 }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
                 emptyLabel="hh:mm"
                 helperText={languageDisplay(question, props.language)}
               />
@@ -703,6 +878,52 @@ const Forms = (props) => {
                 {question.max_time}
               </FormHelperText>
             ) : null}
+          </>
+        );
+
+      case "radio":
+        question.answer = question.options[0].value;
+        return (
+          <>
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">
+                {languageDisplay(question, props.language)}
+              </FormLabel>
+              <RadioGroup
+                name={question.name}
+                value={radioValues[question.name] || null}
+                onChange={(event) => {
+                  event.persist();
+                  setRadioValues((prevState) => {
+                    return {
+                      ...prevState,
+                      [question.name]: event.target.value,
+                    };
+                  });
+
+                  question.answer = event.target.value;
+                  fieldValidator(question);
+                }}
+                onBlur={() => {
+                  fieldValidator(question);
+                }}
+                onFocus={() => {
+                  fieldValidator(question);
+                }}
+              >
+                {question.options.map((item, i) => {
+                  return (
+                    <FormControlLabel
+                      key={i}
+                      value={item.value}
+                      control={<Radio color="primary" />}
+                      label={languageDisplay(item, props.language)}
+                      labelPlacement="start"
+                    />
+                  );
+                })}
+              </RadioGroup>
+            </FormControl>
           </>
         );
 
@@ -741,6 +962,7 @@ const Forms = (props) => {
           </Button>
         </Grid>
       </Grid>
+      {/*mail sent dialog*/}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -752,11 +974,130 @@ const Forms = (props) => {
             {confirmationVisible
               ? languageDisplay(mailSent, props.language)
               : null}
+            {mailNotSentVisible
+              ? languageDisplay(mailNotSent, props.language)
+              : null}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary" autoFocus>
             {languageDisplay(closeLabel, props.language)}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/*payment option dialog*/}
+      <Dialog
+        open={paymentOpen}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        fullWidth
+        maxWidth="lg"
+      >
+        <DialogContent className={classes.paymentDialog}>
+          <Typography
+            variant="h6"
+            component="p"
+            className={classes.paymentLabel}
+          >
+            {languageDisplay(priceLabel, props.language).props.children +
+              ": " +
+              props.price +
+              "CHF"}
+          </Typography>
+
+          <PayPalButton
+            amount={2}
+            currency="CHF"
+            shippingPreference="NO_SHIPPING"
+            onSuccess={(details, data) => {
+              let subject =
+                "Payment Conirmation: " + firstname + " " + lastname;
+              let text =
+                "Your payment of " +
+                props.price +
+                "CHF has been confirmed, contact us in case of problems";
+
+              axios
+                .post(
+                  `https://admin.tannerdev.tech/registrations`,
+                  {
+                    firstName: firstname,
+                    lastName: lastname,
+                    club: club,
+                    email: email,
+                    answers: answers,
+                    event: props.eventId,
+                    eventName: props.eventname,
+                    payerInfo: {
+                      mail: details.payer.email_address,
+                      firstName: details.payer.name.given_name,
+                      lastName: details.payer.name.surname,
+                      payer_id: details.payer.payer_id,
+                    },
+                  },
+                  { headers: { "Content-Type": "application/json" } }
+                )
+                .then(
+                  (response) => {
+                    axios
+                      .post(
+                        `https://admin.tannerdev.tech/email`,
+                        {
+                          to: email,
+                          from: "contact@tannerdev.tech",
+                          replyTo: "contact@tannerdev.tech",
+                          cc: "mathias.tanner.ge@gmail.com",
+                          subject: subject,
+                          text: text,
+                          html: text,
+                        },
+                        { headers: { "Content-Type": "application/json" } }
+                      )
+                      .then(
+                        (response) => {
+                          setPaymentConfirmationOpen(true);
+                        },
+                        (error) => {}
+                      );
+                  },
+                  (error) => {}
+                );
+            }}
+            options={{
+              clientId:
+                "AZVrcPE2fQih5ja4qYt54OQVrd22kfMVa_ayqJlCOmhMTbzs00kcfyG0q1jdf0uts7a5FB4AHYqo35Ub",
+              currency: "CHF",
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handlePaymentClose} color="primary" autoFocus>
+            {languageDisplay(closeLabel, props.language)}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={paymentConfirmationOpen}
+        onClose={handlePaymentClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {languageDisplay(registrationSuccess, props.language)}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {languageDisplay(registrationSuccessMsg, props.language)}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleFinalConfirmationClose}
+            color="primary"
+            autoFocus
+          >
+            close
           </Button>
         </DialogActions>
       </Dialog>

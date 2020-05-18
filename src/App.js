@@ -18,7 +18,7 @@ import { Router } from "@reach/router";
 import AboutUs from "./components/pages/AboutUs.js";
 import MemberPage from "./components/pages/MemberPage.js";
 import EventPage from "./components/pages/events/EventPage.js";
-import Evenment from "./components/pages/events/Evenment.js";
+import EvenmentContainer from "./components/pages/events/EvenmentContainer.js";
 import International from "./components/pages/International";
 import CommissionsPage from "./components/pages/CommissionsPage";
 import ClaendarContainer from "./components/pages/events/CalendarContainer.js";
@@ -68,9 +68,15 @@ function App() {
                 <AboutUs path="/aboutus" />
                 <MemberPage path="/members" />
                 <EventPage path="/events" />
-                <Evenment path="/swissgathering" name="Swiss Gathring" />
-                <Evenment path="/bearcup" name="Bear Cup" />
-                <Evenment path="/instructorcamp" name="Intructor Boot Camp" />
+                <EvenmentContainer
+                  path="/swissgathering"
+                  eventName="swissgathering"
+                />
+                <EvenmentContainer path="/bearcup" eventName="bearcup" />
+                <EvenmentContainer
+                  path="/instructorcamp"
+                  eventName="instructorcamp"
+                />
                 <ClaendarContainer path="/calendar" />
                 <International path="/international" />
                 <CommissionsPage path="/commissions" />
