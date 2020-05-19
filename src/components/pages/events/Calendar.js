@@ -66,17 +66,23 @@ const useStyles = makeStyles((theme) => ({
 
     padding: "15px",
     [theme.breakpoints.down("xs")]: {
+      padding: "0px",
       margin: "0px",
       maxWidth: "90vw",
     },
   },
   expanded: {
     margin: "auto",
-
     padding: "15px",
     [theme.breakpoints.down("xs")]: {
+      padding: "0px",
       margin: "0px",
       maxWidth: "90vw",
+    },
+  },
+  expandedDetails: {
+    [theme.breakpoints.down("xs")]: {
+      padding: "5px",
     },
   },
 }));
@@ -580,7 +586,7 @@ const Calendar = (props) => {
                 )}
               </Typography>
             </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
+            <ExpansionPanelDetails className={classes.expandedDetails}>
               <Query query={FORM_QUERY} id={props.calendarPage.form.id}>
                 {({ data: { form } }) => {
                   return <Forms form={form} />;
