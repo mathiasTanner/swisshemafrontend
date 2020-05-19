@@ -61,6 +61,9 @@ const useStyles = makeStyles((theme) => ({
     margin: "auto",
     marginTop: "15px",
     marginBottom: "15px",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
   },
   selectQuestion: {
     width: "30%",
