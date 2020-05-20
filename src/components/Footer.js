@@ -32,9 +32,10 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     top: "auto",
     bottom: 0,
+    backgroundColor: `${theme.palette.primary.dark}`,
   },
   bottomNavigation: {
-    backgroundColor: `${theme.palette.primary.main}`,
+    backgroundColor: `${theme.palette.primary.dark}`,
   },
   bottomLabel: {
     color: `${theme.palette.secondary.light}`,
@@ -76,7 +77,7 @@ const Footer = (props) => {
   };
 
   return (
-    <AppBar position="fixed" color="primary" className={classes.appBar}>
+    <AppBar position="fixed" className={classes.appBar}>
       <BottomNavigation showLabels className={classes.bottomNavigation}>
         <BottomNavigationAction
           label={languageDisplay(props.footer.contactLabel, props.language)}
@@ -100,6 +101,7 @@ const Footer = (props) => {
           rel="noopener"
         />
       </BottomNavigation>
+
       <Dialog
         fullScreen={isMobile}
         open={openNews}

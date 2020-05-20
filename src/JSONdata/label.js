@@ -1,3 +1,11 @@
+export const language = {
+  EN: "Language",
+  FR: "Langue",
+  DE: "Sprache",
+  IT: "Linguaggio",
+  RO: "Lingua",
+};
+
 export const website = {
   EN: "Website",
   FR: "Site web",

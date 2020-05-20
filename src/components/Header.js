@@ -31,9 +31,12 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 
 import languageDisplay from "../functions/languageDisplay";
-import { menu } from "../JSONdata/label";
+import { menu, language } from "../JSONdata/label";
 
 const useStyles = makeStyles((theme) => ({
+  appbar: {
+    backgroundColor: `${theme.palette.primary.dark}`,
+  },
   logoButton: {
     marginRight: theme.spacing(2),
   },
@@ -144,7 +147,7 @@ const Header = (props) => {
   };
 
   return (
-    <AppBar color="primary" position="fixed">
+    <AppBar classes={{ root: classes.appbar }} position="fixed">
       <Toolbar variant="dense">
         <Grid
           container
@@ -396,7 +399,7 @@ const Header = (props) => {
                 <Hidden smDown>
                   <TextField
                     select
-                    label="Language"
+                    label={languageDisplay(language, props.language)}
                     value={props.language}
                     onChange={handleChange}
                     SelectProps={{
