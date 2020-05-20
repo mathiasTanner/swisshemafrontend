@@ -28,14 +28,14 @@ import languageDisplay from "../../functions/languageDisplay";
 
 const useStyles = makeStyles((theme) => ({
   carousel: {
-    minHeight: "40vh",
+    minHeight: "50vh",
     minWidth: "100vw",
     margin: "5px",
     padding: "5px",
     flex: 1,
   },
   carouselImg: {
-    maxHeight: "30vh",
+    maxHeight: "40vh",
     minWidth: "98.5vw",
   },
   contentPaper: {
@@ -237,26 +237,59 @@ const AboutUs = (props) => {
                   alignItems="center"
                   spacing={2}
                 >
-                  {aboutUs.status.map((statut, i) => {
-                    return (
-                      <Grid item key={i}>
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          className={classes.statusbutton}
-                          href={
-                            process.env.REACT_APP_BACKEND_URL +
-                            statut.document.url
-                          }
-                          target="_blank"
-                        >
-                          {statut.language === "FR"
-                            ? "Statuts en Français"
-                            : "Deutsche Statuten"}
-                        </Button>
-                      </Grid>
-                    );
-                  })}
+                  {props.language === "FR" ? (
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        component={Link}
+                        className={classes.statusbutton}
+                        href={
+                          process.env.REACT_APP_BACKEND_URL +
+                          aboutUs.status.find(
+                            ({ language }) => language === "FR"
+                          ).document.url
+                        }
+                        target="_blank"
+                      >
+                        Statuts
+                      </Button>
+                    </Grid>
+                  ) : props.language === "DE" ? (
+                    <Button
+                      variant="contained"
+                      component={Link}
+                      className={classes.statusbutton}
+                      href={
+                        process.env.REACT_APP_BACKEND_URL +
+                        aboutUs.status.find(({ language }) => language === "DE")
+                          .document.url
+                      }
+                      target="_blank"
+                    >
+                      Statuten
+                    </Button>
+                  ) : (
+                    aboutUs.status.map((statut, i) => {
+                      return (
+                        <Grid item key={i}>
+                          <Button
+                            variant="contained"
+                            component={Link}
+                            className={classes.statusbutton}
+                            href={
+                              process.env.REACT_APP_BACKEND_URL +
+                              statut.document.url
+                            }
+                            target="_blank"
+                          >
+                            {statut.language === "FR"
+                              ? "Statuts en Français"
+                              : "Deutsche Statuten"}
+                          </Button>
+                        </Grid>
+                      );
+                    })
+                  )}
                 </Grid>
               </Grid>
               <Grid item id="publications" className={classes.publications}>

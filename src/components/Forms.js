@@ -319,11 +319,11 @@ const Forms = (props) => {
       for (const q of props.form.questions) {
         if (q.type === "email") {
           setEmail(q.answer);
-        } else if (q.name === "First name") {
+        } else if (q.name.toUpperCase() === "FIRST NAME") {
           setFirstname(q.answer);
-        } else if (q.name === "Last name") {
+        } else if (q.name.toUpperCase() === "LAST NAME") {
           setLastname(q.answer);
-        } else if (q.name === "Club") {
+        } else if (q.name.toUpperCase() === "CLUB") {
           setClub(q.answer);
         } else {
           setAnswers((prevState) => {

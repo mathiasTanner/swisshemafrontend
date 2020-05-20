@@ -16,12 +16,12 @@ const HEADER_QUERY = gql`
         code
         name
       }
-      menuitems {
+      menuitems(sort: "order") {
         name
         FR
         EN
         DE
-        submenu {
+        submenu(sort: "order") {
           name
           FR
           EN
