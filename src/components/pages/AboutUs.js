@@ -63,6 +63,9 @@ const useStyles = makeStyles((theme) => ({
   detail: {},
   langButton: {
     margin: "5px",
+    [theme.breakpoints.down("xs")]: {
+      paddingTop: "35px",
+    },
   },
   button: {
     backgroundColor: `${theme.palette.secondary.light} `,
@@ -172,7 +175,7 @@ const AboutUs = (props) => {
                 <Grid
                   container
                   direction="row"
-                  justify="space-evenly"
+                  justify="center"
                   alignItems="center"
                   spacing={isMobile ? 1 : 2}
                 >
