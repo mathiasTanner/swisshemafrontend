@@ -24,7 +24,7 @@
     "jodit-react": "^1.0.42",
     "material-table": "^1.57.2",
     "material-ui-dropzone": "^3.0.0",
-    "moment": "2.24.0",
+    "moment": "2.29.2",
     "moment-timezone": "^0.5.28",
     "react": "^16.13.1",
     "react-apollo": "^3.1.5",
@@ -44,7 +44,7 @@
     "typeface-roboto": "0.0.75"
   },
   "resolutions": {
-    "moment": "2.24.0"
+    "moment": "2.29.2"
   },
   "scripts": {
     "start": "react-scripts start",
